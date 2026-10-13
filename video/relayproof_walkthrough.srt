@@ -1,0 +1,110 @@
+1
+00:00:00,000 --> 00:00:05,933
+Can you trust an AI-voiced announcement once it has been shared as a voice
+note?
+
+2
+00:00:05,933 --> 00:00:11,317
+RelayProof is a prototype for a careful answer, not a deepfake detector.
+
+3
+00:00:11,317 --> 00:00:20,139
+Today it can play a selected file and calculate its local SHA-256, but the
+receipt and matched scenario are demo data.
+
+4
+00:00:20,139 --> 00:00:29,933
+It does not yet detect AudioSeal or SynthID, verify C2PA signatures, resolve
+a watermark, compare a re-encoded copy, or call Monad.
+
+5
+00:00:29,933 --> 00:00:32,416
+The product idea has three roles.
+
+6
+00:00:32,416 --> 00:00:35,878
+A publisher signs a claim about an audio file.
+
+7
+00:00:35,878 --> 00:00:42,800
+A provenance mark or embedded credential can help a recipient find that
+claim after sharing.
+
+8
+00:00:42,800 --> 00:00:50,657
+Then the recipient checks the signature, content binding, issuer status, and
+any transformation evidence.
+
+9
+00:00:50,657 --> 00:01:00,533
+Keep each check separate: a watermark can point to a record; it cannot prove
+who made the audio or whether the announcement is true.
+
+10
+00:01:00,533 --> 00:01:04,566
+Existing products already cover parts of this journey.
+
+11
+00:01:04,566 --> 00:01:14,200
+AIWatermark advertises audio certificates and OGG support, with
+provider-reported tests that do not establish speech performance.
+
+12
+00:01:14,200 --> 00:01:18,757
+ContentLens claims browser-based audio soft-binding recovery.
+
+13
+00:01:18,757 --> 00:01:26,600
+Digimarc’s extension documents C2PA checks for MP3 and WAV, plus selected
+watermark-to-manifest recovery.
+
+14
+00:01:26,600 --> 00:01:34,085
+RedoSan documents several WAV watermark methods and DID tools, but its C2PA
+commands are for images.
+
+15
+00:01:34,085 --> 00:01:40,222
+Other projects provide local detectors, C2PA verification, or research
+benchmarks.
+
+16
+00:01:40,222 --> 00:01:46,733
+So the broad combination of watermark, credentials, registry, or blockchain
+is not new.
+
+17
+00:01:46,733 --> 00:01:57,893
+The possible test is narrower: take a clearly labeled public-information
+voice clip, send it through the exact OGG or Opus transformation used by its
+
+18
+00:01:57,893 --> 00:02:02,611
+sharing app, and measure recovery, false matches, and failures.
+
+19
+00:02:02,611 --> 00:02:09,801
+A useful result must distinguish matched evidence, no credential found,
+uncertain, and mismatch.
+
+20
+00:02:09,801 --> 00:02:16,467
+No credential does not mean fake; a valid signature does not prove the claim
+is truthful.
+
+21
+00:02:16,467 --> 00:02:27,303
+Next: separate demo fixtures from real checks, test one end-to-end Opus
+path, and ask a newsroom or publisher whether the issuer-status workflow
+
+22
+00:02:27,303 --> 00:02:28,733
+solves a real need.
+
+23
+00:02:28,733 --> 00:02:31,743
+Only then decide if Monad adds anything.
+
+24
+00:02:31,743 --> 00:02:36,333
+Today RelayProof is still a UI prototype—not a live verifier.
