@@ -1,0 +1,13 @@
+{
+  "network": "monadTestnet",
+  "chainId": 10143,
+  "rpcUrl": "https://testnet-rpc.monad.xyz",
+  "contract": "RelayProofRegistry",
+  "address": "0x833975Bd88b28B25551dc06F0A87B723dd350c00",
+  "deployer": "0x4E7B07B759CfA103d04482C7183913828977ae35",
+  "transactionHash": "0x0ad18a73b05bdf8861ed90e5b30beddc213581b010368a5bc1c3e58ddf093da0",
+  "blockNumber": 70741752,
+  "deployedAt": "2026-10-13T17:33:06.469Z",
+  "explorer": "https://testnet.monadscan.com/address/0x833975Bd88b28B25551dc06F0A87B723dd350c00",
+  "note": "Prototype registry on testnet. Not audited. Stores digests and status only."
+}
