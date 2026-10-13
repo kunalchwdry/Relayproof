@@ -1,0 +1,83 @@
+name: RelayProof competitor watch
+
+on:
+  schedule:
+    - cron: '25 7 * * 1' # Monday 07:25 UTC / 12:55 PM Asia/Kolkata
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Scan watched sources
+        id: scan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/competitor_watch.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Upload run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: competitor-watch-${{ github.run_number }}
+          path: reports/competitor-watch/latest.md
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Add report to Actions summary
+        if: always()
+        run: |
+          if [ -f reports/competitor-watch/latest.md ]; then
+            cat reports/competitor-watch/latest.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Open review issue when sources change
+        if: steps.scan.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('reports/competitor-watch/latest.md', 'utf8');
+            const date = new Date().toISOString().slice(0, 10);
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Competitor watch update — ${date}`,
+              body: [
+                'Automated public-source change signals were detected. Please review the sources manually; a changed page or commit is not proof of a new/working competitor.',
+                '',
+                report,
+                '',
+                'Curated comparison: `COMPETITOR_COMPARISON.md`.'
+              ].join('\n')
+            });
+
+      - name: Persist baseline, state changes, and incomplete-scan warnings
+        if: steps.scan.outputs.baseline == 'true' || steps.scan.outputs.changed == 'true' || steps.scan.outputs.state_updated == 'true' || steps.scan.outputs.incomplete == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f data/competitor-watch-state.json ]; then
+            git add data/competitor-watch-state.json
+          fi
+          git add reports/competitor-watch/latest.md
+          if git diff --cached --quiet; then
+            echo "No baseline/report changes to commit."
+          else
+            git commit -m "chore: update competitor watch baseline"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
