@@ -1,0 +1,25 @@
+{
+  "name": "relayproof-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "watch:competitors": "python3 scripts/competitor_watch.py",
+    "test:watch": "python3 scripts/test_competitor_watch.py",
+    "test:credentials": "node --test test/credential.test.mjs",
+    "test:sebi": "node --test test/sebi-preflight.test.mjs",
+    "test:sbr": "python3 -m unittest server.test_sbr_contract",
+    "test:server": "python3 -m unittest server.test_local_guard server.test_sbr_contract",
+    "test:extension": "node --test test/extension-capture.test.mjs test/extension-credential-sync.test.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "6.1.2",
+    "vite": "8.3.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {}
+}
