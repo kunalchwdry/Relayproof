@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RelayProof Media Check</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div class="brand-mark" aria-hidden="true">R</div>
+      <div class="brand-copy"><strong>RelayProof</strong><span>MEDIA CHECK</span></div>
+      <span class="local-badge"><i></i> LOCAL</span>
+    </header>
+
+    <div id="service-status" class="service-status checking" role="status" aria-live="polite">
+      <i></i><span>Checking the local RelayProof service…</span>
+    </div>
+
+    <section class="card token-card">
+      <div class="section-heading"><span class="step">··</span><div><h2>Local API token</h2><p>Only needed if the backend sets RELAYPROOF_API_TOKEN.</p></div></div>
+      <div class="token-row">
+        <input id="api-token" class="token-input" type="password" autocomplete="off" spellcheck="false" placeholder="Paste token (optional)">
+        <button id="save-token" class="primary-button token-save" type="button">Save</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading"><span class="step">01</span><div><h2>Signed sidecar</h2><p>Load the `.relayproof.json` issued for the original.</p></div></div>
+      <label class="file-button" for="sidecar-input">Choose sidecar</label>
+      <input id="sidecar-input" class="visually-hidden" type="file" accept="application/json,.json,.relayproof.json">
+      <div id="sidecar-name" class="file-name">No sidecar selected</div>
+      <div id="sidecar-status" class="sidecar-status">A valid signature is required before comparison.</div>
+    </section>
+
+    <section class="card">
+      <div class="section-heading"><span class="step">02</span><div><h2>Choose media</h2><p>Exact file check first; candidate match only if the sidecar has a fingerprint.</p></div></div>
+      <label class="file-button" for="media-input">Choose audio / video file</label>
+      <input id="media-input" class="visually-hidden" type="file" accept="audio/*,video/*,.opus,.ogg,.m4a,.mp3,.wav,.aac,.flac,.aiff,.aif,.webm,.mp4,.mov,.m4v,.mkv,.avi,.mpeg,.mpg">
+      <div id="media-name" class="file-name">No media selected</div>
+      <button id="compare-file" class="primary-button" type="button" disabled>Check selected file</button>
+    </section>
+
+    <section class="capture-card">
+      <div class="section-heading"><span class="step brass">03</span><div><h2>Capture current tab</h2><p>For YouTube or another page playing audio.</p></div></div>
+      <label class="duration-label" for="capture-duration">Capture length</label>
+      <select id="capture-duration">
+        <option value="15">15 seconds</option>
+        <option value="30" selected>30 seconds</option>
+        <option value="60">60 seconds</option>
+      </select>
+      <div class="capture-actions">
+        <button id="start-capture" class="capture-button" type="button" disabled>Start tab capture</button>
+        <button id="stop-capture" class="stop-button" type="button" disabled>Stop</button>
+      </div>
+      <p class="capture-note">Start playback first, then click Start. Recording runs in the background, so it continues if you close this popup; reopen it to see the result. The extension records only after you click Start and does not download the source file.</p>
+    </section>
+
+    <section id="result" class="result-card" aria-live="polite" hidden></section>
+
+    <footer class="footer">
+      <strong>A match is not an authenticity verdict.</strong>
+      <span>YouTube/tab audio is a re-recorded sample, so exact SHA-256 cannot authenticate the source. Chromaprint gives an uncalibrated audio-similarity score only.</span>
+    </footer>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
