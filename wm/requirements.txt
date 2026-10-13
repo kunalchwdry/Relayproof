@@ -1,0 +1,12 @@
+# Pinned versions used for the watermark spike and the issue/verify CLI.
+# Install with wm/setup_env.sh (CPU-only torch). Tested on Python 3.13.
+torch==2.14.1
+torchaudio==2.11.0
+audioseal==0.2.0
+omegaconf==2.4.0
+imageio-ffmpeg==0.6.0
+soundfile==0.14.0
+numpy==2.5.4
+piper-tts==1.8.0
+web3==7.16.0
+pycryptodome==3.24.1
