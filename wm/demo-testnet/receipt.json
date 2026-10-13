@@ -1,0 +1,13 @@
+{
+  "manifestDigest": "fc9064831250660509e4e00088a0b06dab083a413a1e0453bf9228e16cbef244",
+  "credentialId": "fc9064831250660509e4e00088a0b06dab083a413a1e0453bf9228e16cbef244",
+  "watermarkId": 65049,
+  "issuerKeyHash": "0xd9d465b96d11976a09f7ff8568931b9703ee0c9c9e6301af68856fe57565898e",
+  "registered": true,
+  "transactionHash": "0x1f4c66c7133911e2333f1382bcbf0631c0ac13a242762a92be4dbb3b621fbe1b",
+  "blockNumber": 70746430,
+  "chainId": 10143,
+  "contract": "0x833975Bd88b28B25551dc06F0A87B723dd350c00",
+  "issuer": "0x4E7B07B759CfA103d04482C7183913828977ae35",
+  "explorer": "https://testnet.monadscan.com/tx/0x1f4c66c7133911e2333f1382bcbf0631c0ac13a242762a92be4dbb3b621fbe1b"
+}

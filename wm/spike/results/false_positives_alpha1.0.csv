@@ -1,0 +1,7 @@
+clip,detect_prob,best_bit_matches_vs_any_payload,false_positive
+unmarked_01.wav,0.0034,8,False
+unmarked_02.wav,0.0,11,False
+unmarked_03.wav,0.0121,10,False
+unmarked_04.wav,0.0,9,False
+unmarked_05.wav,0.0,10,False
+unmarked_06.wav,0.0027,12,False

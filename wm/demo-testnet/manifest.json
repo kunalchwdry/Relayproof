@@ -1,0 +1,20 @@
+{
+  "schema": "relayproof.wm-manifest.v2",
+  "title": "Testnet demo clip",
+  "issuer": "RelayProof prototype",
+  "issuerKeyId": "rp-prototype-key-1",
+  "watermarkId": 65049,
+  "watermark": {
+    "model": "audioseal_wm_16bits",
+    "alpha": 2.0
+  },
+  "asset": {
+    "file": "protected.wav",
+    "sha256": "2cd1c69be97031fce0372654ee08ee525c366a8eeadc6cd3368bb727c0f7b087",
+    "sampleRate": 16000,
+    "channels": 1,
+    "codec": "pcm_s16le"
+  },
+  "createdAt": "2026-10-13T17:56:56Z",
+  "createdAtNote": "issuer-asserted, not independently proven"
+}
