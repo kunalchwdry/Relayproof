@@ -1,0 +1,46 @@
+{
+  "version": 3,
+  "description": "Public-source watchlist for audio provenance, C2PA soft bindings, and Monad Metropolis Track 04. This is a discovery aid, not an exhaustive market feed.",
+  "repos": [
+    {"slug": "Musaga-Technology/Grain", "role": "Metropolis Track 04; onchain image provenance"},
+    {"slug": "wngstnr-code/origo", "role": "Metropolis Track 04; onchain photo fingerprints"},
+    {"slug": "louissarvin/gapless", "role": "Metropolis research repo; conditional Soft Seal proposal"},
+    {"slug": "CreativeMayhemLtd/provcheck", "role": "Local C2PA verifier/creator kit and watermark checks"},
+    {"slug": "amurlaniakea/audiotrust", "role": "Local C2PA plus AudioSeal verifier"},
+    {"slug": "yyf/ai-audio-provenance", "role": "Audio provenance inspection and stress-test tooling"},
+    {"slug": "fullo/Sussurro", "role": "Speech workbench with planned provenance-marking issues"},
+    {"slug": "codemyriad/cassini-format", "role": "OpusTags transcript and processing-provenance format"},
+    {"slug": "rtonf/neutral-tts-workbench", "role": "Local TTS workbench with explicit AudioSeal marking"},
+    {"slug": "themankindproject/audiofp", "role": "Audio fingerprinting SDK and AudioSeal detection component"},
+    {"slug": "facebookresearch/audioseal", "role": "Audio watermark primitive"},
+    {"slug": "resemble-ai/Perth", "role": "Open-source Resemble audio watermark model"},
+    {"slug": "c2pa-org/softbinding-algorithm-list", "role": "C2PA soft-binding interoperability list"},
+    {"slug": "Redo-San/RedoSan-Authenticity", "role": "Client-side authenticity suite; WAV watermark tooling and image C2PA claims"},
+    {"slug": "richardwooding/c2pa-inspector", "role": "Browser-local C2PA validator/signer; review documented formats for audio support"},
+    {"slug": "Blimp3/provenance-lens-extension", "role": "Browser extension for C2PA image and supported OpenAI short-audio checks"},
+    {"slug": "1D-Coda/em-audio", "role": "Research/reference implementation for derived-audio provenance"},
+    {"slug": "Original-Pictures/soft-bindings-benchmark", "role": "Benchmark of C2PA soft bindings for images, audio, and video"},
+    {"slug": "digimarc-corp/c2pa-content-credentials-extension", "role": "Browser C2PA verifier for MP3/WAV with supported watermark-to-SBR recovery"}
+  ],
+  "issues": [
+    {"url": "https://api.github.com/repos/fullo/Sussurro/issues/240", "role": "Sussurro AudioSeal/C2PA implementation spike"},
+    {"url": "https://api.github.com/repos/fullo/Sussurro/issues/257", "role": "Sussurro generated-audio marking and file-check scope"}
+  ],
+  "pages": [
+    {"name": "AIWatermark audio", "url": "https://aiwatermark.com/audio.html"},
+    {"name": "AIWatermark C2PA/conformance", "url": "https://aiwatermark.com/c2pa.html"},
+    {"name": "Resemble Watermarker", "url": "https://www.resemble.ai/products/watermarker"},
+    {"name": "AWS SENTINEL audio provenance", "url": "https://aws.amazon.com/blogs/media/building-audio-provenance-for-ai-generated-content-at-the-source-with-aws/"},
+    {"name": "OpenAI Content Provenance API", "url": "https://developers.openai.com/api/docs/guides/content-provenance"},
+    {"name": "Monad Metropolis Track 04", "url": "https://monad.xyz/developers/hackathons/metropolis"},
+    {"name": "ContentLens C2PA Validator", "url": "https://chromewebstore.google.com/detail/contentlens-c2pa-validato/gdejpnjeepoffhkbcgnjdbkgpohdhmln?hl=en"},
+    {"name": "Digimarc C2PA Content Credentials extension", "url": "https://chromewebstore.google.com/detail/mjkaocdlpjmphfkjndocehcdhbigaafp?hl=en"}
+  ],
+  "github_searches": [
+    {"name": "Metropolis Track 04 projects", "query": "Metropolis Track 04"},
+    {"name": "AudioSeal implementations", "query": "AudioSeal"},
+    {"name": "Opus audio provenance projects", "query": "Opus audio provenance"},
+    {"name": "C2PA audio implementations", "query": "C2PA audio"},
+    {"name": "General audio provenance projects", "query": "audio provenance"}
+  ]
+}
