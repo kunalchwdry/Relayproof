@@ -1,0 +1,99 @@
+/home/user/wm-env/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+/home/user/wm-env/lib/python3.13/site-packages/torch/nn/utils/weight_norm.py:145: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+marked_01.wav none 1.0 16
+marked_01.wav opus_64k 1.0 16
+marked_01.wav opus_32k 1.0 16
+marked_01.wav opus_16k 0.979 16
+marked_01.wav aac_64k 1.0 16
+marked_01.wav aac_32k 0.986 16
+marked_01.wav mp3_64k 1.0 16
+marked_01.wav resample_22k 1.0 16
+marked_01.wav resample_8k 1.0 16
+marked_01.wav gain_minus6db 1.0 16
+marked_01.wav trim_first_1s 0.974 16
+marked_01.wav trim_to_4s 1.0 16
+marked_01.wav noise_20db 0.484 14
+W1013 16:57:37.881000 2652 torch/_dynamo/convert_frame.py:2008] [1/8] torch._dynamo hit config.recompile_limit (8)
+W1013 16:57:37.881000 2652 torch/_dynamo/convert_frame.py:2008] [1/8]    function: 'forward' (/home/user/wm-env/lib/python3.13/site-packages/audioseal/libs/moshi/modules/conv.py:248)
+W1013 16:57:37.881000 2652 torch/_dynamo/convert_frame.py:2008] [1/8]    last reason: 1/7: tensor 'x' size mismatch at index 1. expected 32, actual 1
+W1013 16:57:37.881000 2652 torch/_dynamo/convert_frame.py:2008] [1/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W1013 16:57:37.881000 2652 torch/_dynamo/convert_frame.py:2008] [1/8] To diagnose recompilation issues, see https://docs.pytorch.org/docs/main/user_guide/torch_compiler/compile/programming_model.recompilation.html
+W1013 16:57:37.890000 2652 torch/_dynamo/convert_frame.py:2008] [2/8] torch._dynamo hit config.recompile_limit (8)
+W1013 16:57:37.890000 2652 torch/_dynamo/convert_frame.py:2008] [2/8]    function: 'forward' (/home/user/wm-env/lib/python3.13/site-packages/audioseal/libs/moshi/modules/seanet.py:93)
+W1013 16:57:37.890000 2652 torch/_dynamo/convert_frame.py:2008] [2/8]    last reason: 2/7: x.stride()[1] != x.size()[2]  # return F.elu(input, self.alpha, self.inplace)  # nn/modules/activation.py:620 in forward (_prims_common/__init__.py:288 in check_contiguous_sizes_strides)
+W1013 16:57:37.890000 2652 torch/_dynamo/convert_frame.py:2008] [2/8] To log all recompilation reasons, use TORCH_LOGS="recompiles".
+W1013 16:57:37.890000 2652 torch/_dynamo/convert_frame.py:2008] [2/8] To diagnose recompilation issues, see https://docs.pytorch.org/docs/main/user_guide/torch_compiler/compile/programming_model.recompilation.html
+marked_02.wav none 1.0 16
+marked_02.wav opus_64k 1.0 16
+marked_02.wav opus_32k 1.0 16
+marked_02.wav opus_16k 0.99 16
+marked_02.wav aac_64k 0.992 16
+marked_02.wav aac_32k 0.99 16
+marked_02.wav mp3_64k 1.0 16
+marked_02.wav resample_22k 1.0 16
+marked_02.wav resample_8k 1.0 16
+marked_02.wav gain_minus6db 1.0 16
+marked_02.wav trim_first_1s 1.0 16
+marked_02.wav trim_to_4s 1.0 16
+marked_02.wav noise_20db 0.442 12
+marked_03.wav none 1.0 16
+marked_03.wav opus_64k 1.0 16
+marked_03.wav opus_32k 1.0 16
+marked_03.wav opus_16k 0.98 16
+marked_03.wav aac_64k 1.0 16
+marked_03.wav aac_32k 0.98 16
+marked_03.wav mp3_64k 1.0 16
+marked_03.wav resample_22k 1.0 16
+marked_03.wav resample_8k 1.0 16
+marked_03.wav gain_minus6db 1.0 16
+marked_03.wav trim_first_1s 1.0 16
+marked_03.wav trim_to_4s 1.0 16
+marked_03.wav noise_20db 0.614 14
+marked_04.wav none 1.0 16
+marked_04.wav opus_64k 1.0 16
+marked_04.wav opus_32k 1.0 16
+marked_04.wav opus_16k 1.0 16
+marked_04.wav aac_64k 1.0 16
+marked_04.wav aac_32k 0.996 16
+marked_04.wav mp3_64k 1.0 16
+marked_04.wav resample_22k 1.0 16
+marked_04.wav resample_8k 1.0 16
+marked_04.wav gain_minus6db 1.0 16
+marked_04.wav trim_first_1s 0.994 16
+marked_04.wav trim_to_4s 1.0 16
+marked_04.wav noise_20db 0.534 15
+marked_05.wav none 1.0 16
+marked_05.wav opus_64k 1.0 16
+marked_05.wav opus_32k 1.0 16
+marked_05.wav opus_16k 1.0 16
+marked_05.wav aac_64k 1.0 16
+marked_05.wav aac_32k 1.0 16
+marked_05.wav mp3_64k 1.0 16
+marked_05.wav resample_22k 1.0 16
+marked_05.wav resample_8k 1.0 16
+marked_05.wav gain_minus6db 1.0 16
+marked_05.wav trim_first_1s 0.994 16
+marked_05.wav trim_to_4s 1.0 16
+marked_05.wav noise_20db 0.461 15
+marked_06.wav none 1.0 16
+marked_06.wav opus_64k 1.0 16
+marked_06.wav opus_32k 0.999 16
+marked_06.wav opus_16k 0.978 16
+marked_06.wav aac_64k 1.0 16
+marked_06.wav aac_32k 0.947 16
+marked_06.wav mp3_64k 1.0 16
+marked_06.wav resample_22k 1.0 16
+marked_06.wav resample_8k 1.0 16
+marked_06.wav gain_minus6db 1.0 16
+marked_06.wav trim_first_1s 0.996 16
+marked_06.wav trim_to_4s 1.0 16
+marked_06.wav noise_20db 0.397 16
+UNMARKED unmarked_01.wav 0.003 8
+UNMARKED unmarked_02.wav 0.0 11
+UNMARKED unmarked_03.wav 0.012 10
+UNMARKED unmarked_04.wav 0.0 9
+UNMARKED unmarked_05.wav 0.0 10
+UNMARKED unmarked_06.wav 0.003 12
+WROTE /home/user/watermark/results
