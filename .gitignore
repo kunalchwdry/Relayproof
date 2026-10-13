@@ -1,0 +1,18 @@
+# Dependencies and build output
+node_modules/
+dist/
+chain/node_modules/
+chain/artifacts/
+chain/cache/
+chain/typechain-types/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Local secrets and scratch. Never commit keys.
+.env
+.env.*
+*.key
+*.pem
+wm/spike/clips/*.tmp
+wm/**/out/
