@@ -355,7 +355,7 @@ export default function AnalyzeView({ notify }) {
               </ul>
             </article>
           </div>
-          <p className="analyze-empty">{result.frames.length ? 'AI-generated judgments from frames and text. Leads to check, not proof. ' : ''}Live web checks use SerpAPI results shown above.</p>
+          <p className="analyze-empty">These are AI-generated judgments from frames and text: leads to check, not proof. Claim sources are shown under each claim.</p>
         </div>
       )}
 
