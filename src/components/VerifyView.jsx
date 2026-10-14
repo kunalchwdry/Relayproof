@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import Icon from './Icons.jsx';
 import ResultCard from './ResultCard.jsx';
+import AiExplain from './AiExplain.jsx';
 import { formatBytes } from '../data.js';
 
 const VIDEO_EXTENSION = /\.(mp4|mov|m4v|webm|mkv|avi|mpeg|mpg)$/i;
@@ -155,6 +156,7 @@ export default function VerifyView({
         <UploadPanel localFile={localFile} credential={credential} onFile={onFile} onClear={onClearFile} onCredential={onCredential} onClearCredential={onClearCredential} />
         <ResultCard verification={verification} credential={credential} localFile={localFile} onReceipt={onShowReceipt} onPinIssuer={onPinIssuer} onCompareChromaprint={onCompareChromaprint} fingerprintBusy={fingerprintBusy} trusted={trusted} />
       </div>
+      <AiExplain verification={verification} />
       <div className="lower-grid"><TrailPanel /><CaveatPanel onExplain={onExplain} /></div>
       <div className="footer-note"><span>RelayProof · Local cryptographic verifier</span><span>C2PA, watermark recovery & Monad are not connected</span></div>
     </section>

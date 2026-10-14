@@ -5,6 +5,7 @@ const items = [
   { id: 'verify', label: 'Verify a clip', icon: 'verify' },
   { id: 'issue', label: 'Issue credential', icon: 'issue' },
   { id: 'archive', label: 'Credential archive', icon: 'archive' },
+  { id: 'analyze', label: 'Analyse video', icon: 'verify' },
   { id: 'review', label: 'Review audio / video', icon: 'check' },
 ];
 

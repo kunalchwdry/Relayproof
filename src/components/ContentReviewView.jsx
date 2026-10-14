@@ -7,6 +7,16 @@ const MAX_MEDIA_BYTES = 500 * 1024 * 1024;
 const MAX_TRANSCRIPT_BYTES = 2 * 1024 * 1024;
 const MAX_VIDEO_FRAME_SAMPLES = 24;
 const MAX_FRAME_BYTES = 3 * 1024 * 1024;
+// Cloud (NVIDIA NIM) OCR sends JSON, so frames are smaller and fewer to fit the free host's request limit.
+const NIM_FRAME_SAMPLES = 8;
+const NIM_MAX_SIDE = 960;
+const MAX_NIM_FRAME_BYTES = 480 * 1024;
+const blobToDataUrl = blob => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result));
+  reader.onerror = () => reject(new Error('Could not encode a sampled frame.'));
+  reader.readAsDataURL(blob);
+});
 const VIDEO_EXTENSION = /\.(mp4|mov|m4v|webm|mkv|avi|mpeg|mpg)$/i;
 const isVideoMedia = file => Boolean(file && (file.type?.startsWith('video/') || VIDEO_EXTENSION.test(file.name || '')));
 
@@ -116,6 +126,7 @@ export default function ContentReviewView({ notify }) {
   const [frameOcrText, setFrameOcrText] = useState('');
   const [frameOcrNote, setFrameOcrNote] = useState('');
   const [frameOcrError, setFrameOcrError] = useState('');
+  const [ocrProvider, setOcrProvider] = useState('local');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -127,11 +138,19 @@ export default function ContentReviewView({ notify }) {
         setFrameOcrStatus(data.frameOcrAvailable ? 'ready' : 'offline');
         setFrameOcrMessage(data.frameOcrAvailable ? 'Local English OCR ready.' : (data.frameOcrMessage || 'Local OCR is not configured.'));
       })
-      .catch(() => {
-        setAsrStatus('offline');
-        setFrameOcrStatus('offline');
-        setFrameOcrMessage('Local media backend is offline; manual frame review still works.');
-      });
+      .catch(() => fetch('/api/nim/status', { signal: controller.signal })
+        .then(response => response.ok ? response.json() : Promise.reject(new Error('NIM status unavailable.')))
+        .then(nim => {
+          setOcrProvider('nim');
+          setAsrStatus('offline');
+          setFrameOcrStatus(nim.frameOcrAvailable ? 'ready' : 'offline');
+          setFrameOcrMessage(nim.frameOcrAvailable ? 'NVIDIA NIM vision OCR is ready (cloud, English).' : 'NVIDIA NIM is not configured on this server; manual frame review still works.');
+        })
+        .catch(() => {
+          setAsrStatus('offline');
+          setFrameOcrStatus('offline');
+          setFrameOcrMessage('No OCR service is reachable; manual frame review still works.');
+        }));
     return () => controller.abort();
   }, []);
 
@@ -251,6 +270,8 @@ export default function ContentReviewView({ notify }) {
   }
 
   async function scanVideoFrames() {
+    const useNim = ocrProvider === 'nim';
+    if (useNim && frameOcrStatus === 'ready' && !window.confirm('Send up to 8 sampled still frames from this video to NVIDIA NIM to read on-screen text? Only the stills are sent, never the full video.')) return;
     const video = videoRef.current;
     if (!media || !isVideoMedia(media) || !video) {
       notify('Select a video first.');
@@ -290,17 +311,18 @@ export default function ContentReviewView({ notify }) {
       const duration = video.duration;
       if (!Number.isFinite(duration) || duration <= 0) throw new Error('This video has no readable duration.');
       if (!video.videoWidth || !video.videoHeight) throw new Error('Video frames are not available for local sampling.');
-      const count = Math.min(MAX_VIDEO_FRAME_SAMPLES, Math.max(3, Math.ceil(duration / 20) + 1));
+      const count = Math.min(useNim ? NIM_FRAME_SAMPLES : MAX_VIDEO_FRAME_SAMPLES, Math.max(3, Math.ceil(duration / 20) + 1));
       const lastTime = Math.max(0, duration - 0.12);
       const timestamps = Array.from({ length: count }, (_, index) => count === 1 ? lastTime / 2 : lastTime * index / (count - 1));
       const canvas = document.createElement('canvas');
-      const scale = Math.min(1, 1280 / Math.max(video.videoWidth, video.videoHeight));
+      const scale = Math.min(1, (useNim ? NIM_MAX_SIDE : 1280) / Math.max(video.videoWidth, video.videoHeight));
       canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
       canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
       const context = canvas.getContext('2d', { alpha: false });
       if (!context) throw new Error('Browser canvas is unavailable for frame sampling.');
       video.pause();
       const body = new FormData();
+      const nimFrames = [];
       const capturedTimestamps = [];
       for (let index = 0; index < timestamps.length; index += 1) {
         if (token !== frameOcrSequence.current) return;
@@ -310,14 +332,21 @@ export default function ContentReviewView({ notify }) {
         const frame = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.72));
         if (!frame) throw new Error('Could not capture a video frame.');
         if (frame.size > MAX_FRAME_BYTES) throw new Error('A sampled frame exceeds the 3 MB size limit.');
-        body.append('frames', frame, `frame-${String(index + 1).padStart(2, '0')}.jpg`);
+        if (useNim) {
+          if (frame.size > MAX_NIM_FRAME_BYTES) throw new Error('A sampled frame is too large for cloud OCR. Try a shorter clip.');
+          nimFrames.push({ timestampSeconds: Number(timestamp.toFixed(3)), dataUrl: await blobToDataUrl(frame) });
+        } else {
+          body.append('frames', frame, `frame-${String(index + 1).padStart(2, '0')}.jpg`);
+        }
         capturedTimestamps.push(Number(timestamp.toFixed(3)));
       }
       body.append('timestamps', JSON.stringify(capturedTimestamps));
-      setFrameOcrNote(`Sending ${capturedTimestamps.length} sampled still frames to your local OCR service…`);
+      setFrameOcrNote(`Sending ${capturedTimestamps.length} sampled still frames to ${useNim ? 'NVIDIA NIM (cloud)' : 'your local OCR service'}…`);
       let response;
       try {
-        response = await fetch('/api/ocr/frames', { method: 'POST', body, signal: controller.signal });
+        response = useNim
+          ? await fetch('/api/nim/ocr', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ frames: nimFrames }), signal: controller.signal })
+          : await fetch('/api/ocr/frames', { method: 'POST', body, signal: controller.signal });
       } catch {
         throw new Error('The local OCR backend is offline. Start it on your own computer before sending any sampled frames.');
       }
@@ -386,15 +415,15 @@ export default function ContentReviewView({ notify }) {
             <input ref={mediaInput} className="hidden-file" type="file" accept="audio/*,video/*,.opus,.ogg,.m4a,.mp3,.wav,.aac,.flac,.aiff,.aif,.mp4,.mov,.m4v,.webm,.mkv,.avi,.mpeg,.mpg" onChange={event => { chooseMedia(event.target.files[0]); event.target.value = ''; }} />
             <MediaPreview media={media} url={mediaUrl} onRemove={removeMedia} videoRef={videoRef} />
             {!media && <button type="button" className="btn-outline content-media-choose" onClick={() => mediaInput.current?.click()}>Choose video or audio</button>}
-            <div className={`asr-service-status ${asrStatus}`}><span className="asr-status-dot" />{asrStatus === 'ready' ? `Local Whisper service ready · model ${asrModel}.` : asrStatus === 'checking' ? 'Checking the optional local Whisper service…' : 'Whisper service offline · captions or pasted transcript still work.'}</div>
+            <div className={`asr-service-status ${asrStatus}`}><span className="asr-status-dot" />{asrStatus === 'ready' ? `Local Whisper service ready · model ${asrModel}.` : asrStatus === 'checking' ? 'Checking the optional local Whisper service…' : 'Speech-to-text runs only on your own computer (local Whisper). Captions or a pasted transcript still work.'}</div>
             {media && isVideoMedia(media) && <>
-              <div className={`asr-service-status ${frameOcrStatus}`}><span className="asr-status-dot" />{frameOcrStatus === 'ready' ? 'Local English video-frame OCR ready · sampling stays in your browser.' : frameOcrStatus === 'checking' ? 'Checking the optional local Tesseract OCR service…' : frameOcrMessage}</div>
+              <div className={`asr-service-status ${frameOcrStatus}`}><span className="asr-status-dot" />{frameOcrStatus === 'ready' ? (ocrProvider === 'nim' ? 'NVIDIA NIM vision OCR ready · only the sampled stills are sent, and only after you click.' : 'Local English video-frame OCR ready · sampling stays in your browser.') : frameOcrStatus === 'checking' ? 'Checking the optional local Tesseract OCR service…' : frameOcrMessage}</div>
               <div className="frame-ocr-actions"><button type="button" className="btn-outline" onClick={scanVideoFrames} disabled={frameScanning || frameOcrStatus !== 'ready'}>{frameScanning ? 'Sampling + scanning frames…' : 'Sample frames + read on-screen text'}</button><span className="form-footnote">Up to 24 evenly spaced stills · English OCR · reviewer must check</span></div>
               {frameOcrNote && <div className="transcript-source-note">{frameOcrNote}</div>}
               {frameOcrError && <div className="inline-error" role="alert">{frameOcrError}</div>}
               {frameOcrResults.length > 0 && <div className="frame-ocr-list" aria-label="Timestamped frame OCR results">{frameOcrResults.map(frame => <div className="frame-ocr-row" key={`frame-${frame.index}`}><button type="button" className="frame-time-button" onClick={() => jumpToFrame(frame.timestampSeconds)}>{formatTimestamp(frame.timestampSeconds)} ↗</button><span>{frame.text || (frame.error ? 'OCR failed for this frame.' : 'No readable English text detected.')}</span>{frame.meanOcrConfidence != null && <small>OCR confidence {frame.meanOcrConfidence}%</small>}</div>)}</div>}
             </>}
-            <div className="transcription-privacy"><Icon name="shield" size={13} /><span>Transcription sends the full selected media file to the configured local API. Frame OCR extracts stills in this browser and sends only those sampled images after you click the button. Run these services on your own computer for private media; the shared preview is not for confidential clips.</span></div>
+            <div className="transcription-privacy"><Icon name="shield" size={13} /><span>{ocrProvider === 'nim' ? 'Cloud OCR (NVIDIA NIM): when you click the scan button, up to 8 sampled still frames are sent to NVIDIA to read text. The full video is not uploaded. Do not use confidential clips with cloud OCR.' : 'Transcription sends the full selected media file to the configured local API. Frame OCR extracts stills in this browser and sends only those sampled images after you click the button. Run these services on your own computer for private media; the shared preview is not for confidential clips.'}</span></div>
             {mediaError && <div className="inline-error" role="alert">{mediaError}</div>}
           </article>
           <article className="panel transcript-panel">

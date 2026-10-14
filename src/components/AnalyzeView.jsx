@@ -1,0 +1,377 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Icon from './Icons.jsx';
+import { buildFindings, formatTime } from '../analysis/findings.js';
+
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+const MAX_SAMPLES = 16;
+const BATCH = 4;
+const MAX_FRAME_BYTES = 480 * 1024;
+const VIDEO_EXTENSION = /\.(mp4|mov|m4v|webm|mkv|avi|mpeg|mpg)$/i;
+
+function seekTo(video, time) {
+  return new Promise(resolve => {
+    const done = () => { video.removeEventListener('seeked', done); resolve(); };
+    video.addEventListener('seeked', done);
+    video.currentTime = time;
+    window.setTimeout(done, 4000);
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('Could not encode a frame.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function captureFrame(video, canvas, context, time) {
+  await seekTo(video, time);
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  for (const quality of [0.7, 0.5]) {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (!blob) throw new Error('Could not capture a video frame.');
+    if (blob.size <= MAX_FRAME_BYTES) return blobToDataUrl(blob);
+  }
+  throw new Error('A frame is too large to send. Try a lower-resolution clip.');
+}
+
+// Turns an .srt / .vtt / plain text file into plain transcript text.
+export function parseCaptions(raw) {
+  return String(raw)
+    .split(/\r?\n/)
+    .filter(line => line.trim() && !/^WEBVTT/i.test(line) && !/^\d+$/.test(line.trim()) && !/-->/.test(line) && !/^NOTE\b/.test(line))
+    .map(line => line.replace(/<[^>]+>/g, '').trim())
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function postJson(url, body) {
+  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.detail || `The analysis service returned HTTP ${response.status}.`);
+  return payload;
+}
+
+function AlertPopup({ alerts, onJump, onClose }) {
+  return (
+    <div className="alert-overlay" role="presentation">
+      <div className="alert-dialog" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-desc">
+        <div className="alert-head">
+          <span className="alert-icon"><Icon name="shield" size={18} /></span>
+          <div>
+            <div className="section-kicker">HIGH-PRIORITY FINDINGS</div>
+            <h3 id="alert-title">{alerts.length} thing{alerts.length === 1 ? '' : 's'} need your attention</h3>
+            <p id="alert-desc">These are AI-generated leads from frames and text. Check each one against the clip before acting.</p>
+          </div>
+        </div>
+        <ul className="alert-list">
+          {alerts.map((alert, index) => (
+            <li key={`${alert.title}-${index}`} className={`alert-item ${alert.severity}`}>
+              <div>
+                <strong>{alert.title}</strong>
+                {alert.at != null && <span className="alert-time">at {formatTime(alert.at)}</span>}
+                <p>{alert.description}</p>
+              </div>
+              {alert.at != null && <button type="button" className="btn-outline" onClick={() => onJump(alert.at)}>Jump to frame</button>}
+            </li>
+          ))}
+        </ul>
+        <div className="alert-foot">
+          <button type="button" className="btn-glow" onClick={onClose}>Got it</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AnalyzeView({ notify }) {
+  const [file, setFile] = useState(null);
+  const [url, setUrl] = useState('');
+  const [duration, setDuration] = useState(0);
+  const [transcript, setTranscript] = useState('');
+  const [phase, setPhase] = useState('idle');
+  const [progress, setProgress] = useState('');
+  const [error, setError] = useState('');
+  const [result, setResult] = useState(null);
+  const [popupOpen, setPopupOpen] = useState(false);
+  const videoRef = useRef(null);
+  const fileInput = useRef(null);
+  const captionInput = useRef(null);
+  const runId = useRef(0);
+
+  useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
+
+  const busy = phase === 'sampling' || phase === 'frames' || phase === 'text';
+  const findings = useMemo(() => (result ? buildFindings(result.frames, result.text) : null), [result]);
+
+  function chooseVideo(next) {
+    if (!next) return;
+    if (!next.type?.startsWith('video/') && !VIDEO_EXTENSION.test(next.name || '')) {
+      notify('Choose a video file.');
+      return;
+    }
+    if (next.size > MAX_VIDEO_BYTES) {
+      notify('Videos must be 500 MB or smaller.');
+      return;
+    }
+    if (url) URL.revokeObjectURL(url);
+    setUrl(URL.createObjectURL(next));
+    setFile(next);
+    setDuration(0);
+    setResult(null);
+    setError('');
+    setPhase('idle');
+  }
+
+  async function loadCaptions(next) {
+    if (!next) return;
+    if (next.size > 2 * 1024 * 1024) { notify('Caption files must be 2 MB or smaller.'); return; }
+    setTranscript(parseCaptions(await next.text()));
+    notify('Captions loaded. Review them before analysing.');
+  }
+
+  async function analyse() {
+    const video = videoRef.current;
+    if (!video || !file) return;
+    const token = ++runId.current;
+    const stale = () => token !== runId.current;
+    setError('');
+    setResult(null);
+    setPopupOpen(false);
+    try {
+      if (!Number.isFinite(video.duration) || video.duration <= 0) throw new Error('This video has no readable duration.');
+      const length = video.duration;
+      const count = Math.min(MAX_SAMPLES, Math.max(3, Math.ceil(length / 8) + 1));
+      const times = Array.from({ length: count }, (_, i) => Math.max(0.1, Math.min(length - 0.2, (length * i) / (count - 1))));
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, 960 / Math.max(video.videoWidth || 960, video.videoHeight || 540));
+      canvas.width = Math.max(1, Math.round((video.videoWidth || 960) * scale));
+      canvas.height = Math.max(1, Math.round((video.videoHeight || 540) * scale));
+      const context = canvas.getContext('2d', { alpha: false });
+      video.pause();
+
+      setPhase('sampling');
+      const frames = [];
+      for (let i = 0; i < times.length; i += 1) {
+        if (stale()) return;
+        setProgress(`Playing through the clip: capturing frame ${i + 1} of ${times.length} at ${formatTime(times[i])}`);
+        const dataUrl = await captureFrame(video, canvas, context, times[i]);
+        frames.push({ timestampSeconds: Number(times[i].toFixed(2)), dataUrl });
+      }
+
+      setPhase('frames');
+      const analysed = [];
+      for (let start = 0; start < frames.length; start += BATCH) {
+        if (stale()) return;
+        const batch = frames.slice(start, start + BATCH);
+        setProgress(`Checking frames for illegal content, scams, and visual problems (${Math.min(start + BATCH, frames.length)} of ${frames.length})`);
+        const payload = await postJson('/api/nim/analyze-frames', { frames: batch });
+        analysed.push(...(payload.frames || []));
+      }
+
+      const onScreen = analysed.filter(frame => frame.onScreenText).map(frame => `[${formatTime(frame.timestampSeconds)}] ${frame.onScreenText}`).join('\n');
+      const spoken = transcript.trim();
+      let text = null;
+      if (spoken || onScreen) {
+        setPhase('text');
+        setProgress('Checking the words for scams, unsafe content, and factual or logical problems');
+        text = await postJson('/api/nim/analyze-text', { transcript: spoken, onScreenText: onScreen });
+      }
+      if (stale()) return;
+
+      const framesWithText = analysed.map(frame => ({ ...frame }));
+      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), duration: length };
+      setResult(nextResult);
+      const built = buildFindings(framesWithText, text);
+      setPhase('done');
+      setProgress('');
+      if (built.alerts.length) setPopupOpen(true);
+      notify(built.alerts.length ? `${built.alerts.length} high-priority finding(s).` : 'Analysis finished. No high-priority findings.');
+    } catch (err) {
+      if (stale()) return;
+      setPhase('error');
+      setProgress('');
+      setError(err instanceof Error ? err.message : 'Analysis failed.');
+    }
+  }
+
+  function jump(time) {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, time);
+    video.play().catch(() => {});
+    setPopupOpen(false);
+  }
+
+  const marks = findings?.timelineMarks || [];
+
+  return (
+    <section className="view active analyze-view" aria-labelledby="analyze-title">
+      <div className="section-heading">
+        <div>
+          <div className="section-kicker">VIDEO ANALYSIS</div>
+          <h2 id="analyze-title">Play a clip and check what it shows and says.</h2>
+          <p>The clip is stepped through frame by frame in your browser. Frames go to NVIDIA NIM for reading and safety checks. Speech needs a transcript for now (paste text or upload captions).</p>
+        </div>
+      </div>
+
+      <div className="analyze-grid">
+        <article className="panel analyze-player-panel">
+          {!file ? (
+            <button type="button" className="analyze-drop" onClick={() => fileInput.current?.click()}>
+              <Icon name="check" size={22} />
+              <strong>Choose a video</strong>
+              <span>MP4, WebM, MOV, MKV · up to 500 MB · stays in this browser until you analyse</span>
+            </button>
+          ) : (
+            <video
+              ref={videoRef}
+              className="analyze-video"
+              src={url}
+              controls
+              playsInline
+              preload="metadata"
+              onLoadedMetadata={event => setDuration(event.currentTarget.duration)}
+            />
+          )}
+          <input ref={fileInput} type="file" accept="video/*,.mp4,.webm,.mov,.mkv,.m4v" className="hidden-file" onChange={event => { chooseVideo(event.target.files[0]); event.target.value = ''; }} />
+          {file && (
+            <div className="analyze-meta">
+              <span>{file.name}</span>
+              <span>{duration ? formatTime(duration) : 'loading…'}</span>
+              <button type="button" className="text-button" onClick={() => fileInput.current?.click()}>Change</button>
+            </div>
+          )}
+          {marks.length > 0 && duration > 0 && (
+            <div className="analyze-timeline" aria-label="Timeline of findings">
+              {marks.map((mark, index) => (
+                <button
+                  key={`${mark.at}-${index}`}
+                  type="button"
+                  className={`timeline-mark ${mark.severity}`}
+                  style={{ left: `${Math.min(100, (mark.at / duration) * 100)}%` }}
+                  title={`${formatTime(mark.at)} · ${mark.title}`}
+                  onClick={() => jump(mark.at)}
+                  aria-label={`${formatTime(mark.at)} ${mark.title}`}
+                />
+              ))}
+            </div>
+          )}
+        </article>
+
+        <article className="panel analyze-side-panel">
+          <div className="section-kicker">SPOKEN WORDS</div>
+          <p className="analyze-hint">Speech-to-text is not connected yet. Paste the transcript, or upload captions (.srt, .vtt, .txt).</p>
+          <textarea
+            className="analyze-transcript"
+            rows={7}
+            value={transcript}
+            onChange={event => setTranscript(event.target.value)}
+            placeholder="Paste what is said in the clip…"
+            aria-label="Transcript"
+          />
+          <div className="analyze-caption-actions">
+            <button type="button" className="btn-outline" onClick={() => captionInput.current?.click()}>Upload captions</button>
+            {transcript && <button type="button" className="text-button" onClick={() => setTranscript('')}>Clear</button>}
+          </div>
+          <input ref={captionInput} type="file" accept=".srt,.vtt,.txt" className="hidden-file" onChange={event => { loadCaptions(event.target.files[0]); event.target.value = ''; }} />
+
+          <button type="button" className="btn-glow analyze-run" onClick={analyse} disabled={!file || busy || !duration}>
+            {busy ? 'Analysing…' : 'Analyse this clip'}
+          </button>
+          {busy && <div className="analyze-progress" role="status">{progress}</div>}
+          {error && <div className="inline-error" role="alert">{error}</div>}
+          <p className="analyze-privacy">Sent to NVIDIA NIM: up to 16 downscaled still frames and the text above. The full video is not uploaded. Do not use confidential clips.</p>
+        </article>
+      </div>
+
+      {findings && (
+        <div className="analyze-results">
+          <div className="analyze-summary">
+            <div><strong>{findings.summary.framesAnalysed}</strong><span>frames checked</span></div>
+            <div className={findings.summary.highAlerts ? 'bad' : ''}><strong>{findings.summary.highAlerts}</strong><span>high-priority</span></div>
+            <div><strong>{findings.summary.claimsChecked}</strong><span>claims checked</span></div>
+            <div className={findings.summary.contradicted ? 'bad' : ''}><strong>{findings.summary.contradicted}</strong><span>contradicted</span></div>
+            <div><strong>{findings.summary.supported}</strong><span>supported</span></div>
+          </div>
+
+          <div className="analyze-cards">
+            <article className="panel result-block">
+              <div className="section-kicker">ALERTS</div>
+              {findings.alerts.length === 0 ? <p className="analyze-empty">No high-priority findings.</p> : (
+                <ul className="finding-list">
+                  {findings.alerts.map((alert, index) => (
+                    <li key={`alert-${index}`} className="finding high">
+                      <strong>{alert.title}</strong>{alert.at != null && <button type="button" className="text-button" onClick={() => jump(alert.at)}>{formatTime(alert.at)}</button>}
+                      <p>{alert.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {findings.alerts.length > 0 && <button type="button" className="btn-outline" onClick={() => setPopupOpen(true)}>Show alerts again</button>}
+            </article>
+
+            <article className="panel result-block">
+              <div className="section-kicker">CLAIMS</div>
+              {!result.text ? <p className="analyze-empty">No transcript or on-screen text to check.</p> : findings.claims.length === 0 ? <p className="analyze-empty">No checkable factual claims found.</p> : (
+                <ul className="finding-list">
+                  {findings.claims.map((claim, index) => (
+                    <li key={`claim-${index}`} className={`finding ${claim.level}`}>
+                      <strong>{claim.verdict}</strong>
+                      <p>"{claim.claim}"</p>
+                      <small>{claim.reason}</small>
+                      {claim.logicIssue && <small className="logic-issue">Logic: {claim.logicIssue}</small>}
+                      {claim.sources?.length > 0 && (
+                        <ul className="source-list">
+                          {claim.sources.map(source => <li key={source.link}><a href={source.link} target="_blank" rel="noreferrer">{source.title || source.link}</a></li>)}
+                        </ul>
+                      )}
+                      {claim.searchError && <small>Live search: {claim.searchError}</small>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <article className="panel result-block">
+              <div className="section-kicker">DEEPFAKE &amp; AI-GENERATED SIGNALS</div>
+              <p className="analyze-empty">No dedicated deepfake classifier runs yet, so this is not a deepfake verdict. The vision model's low-confidence observations are listed below for a human to check.</p>
+              {findings.synthetic.length === 0 ? <p className="analyze-empty">No synthetic-artifact observations.</p> : (
+                <ul className="finding-list">
+                  {findings.synthetic.map((item, index) => (
+                    <li key={`syn-${index}`} className="finding low">
+                      <strong>{formatTime(item.at)}</strong> <button type="button" className="text-button" onClick={() => jump(item.at)}>jump</button>
+                      <p>{item.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
+            <article className="panel result-block">
+              <div className="section-kicker">FRAME LOG</div>
+              <ul className="finding-list frame-log">
+                {result.frames.map((frame, index) => (
+                  <li key={`frame-${index}`} className="finding low">
+                    <button type="button" className="text-button" onClick={() => jump(frame.timestampSeconds)}>{formatTime(frame.timestampSeconds)}</button>
+                    <span>{frame.onScreenText || 'No on-screen text'}</span>
+                    {frame.issues.map((issue, i) => <small key={i} className={`issue-tag ${issue.severity}`}>{issue.category.replace(/_/g, ' ')} · {issue.severity}</small>)}
+                    {frame.error && <small>Frame could not be analysed: {frame.error}</small>}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+          <p className="analyze-empty">{result.frames.length ? 'AI-generated judgments from frames and text. Leads to check, not proof. ' : ''}Live web checks use SerpAPI results shown above.</p>
+        </div>
+      )}
+
+      {popupOpen && findings?.alerts.length > 0 && (
+        <AlertPopup alerts={findings.alerts} onJump={jump} onClose={() => setPopupOpen(false)} />
+      )}
+    </section>
+  );
+}

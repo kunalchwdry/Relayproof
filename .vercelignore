@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+video
+presentation
+presentation_assets
+reports
+data
+chain
+wm
+server
+scripts
+extension
+test

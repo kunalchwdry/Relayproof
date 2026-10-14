@@ -16,3 +16,4 @@ __pycache__/
 *.pem
 wm/spike/clips/*.tmp
 wm/**/out/
+.vercel

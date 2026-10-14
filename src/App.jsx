@@ -6,6 +6,7 @@ import IssueView from './components/IssueView.jsx';
 import ArchiveView from './components/ArchiveView.jsx';
 import ReceiptDialog from './components/ReceiptDialog.jsx';
 import ContentReviewView from './components/ContentReviewView.jsx';
+import AnalyzeView from './components/AnalyzeView.jsx';
 import { getMediaKind, isRelayProofCredential, sha256Hex, verifyCredentialAgainstFile, verifyCredentialSignature } from './credential.js';
 import { isKeyTrusted, loadRecords, loadTrustedKeys, pinTrustedKey, saveRecords } from './storage.js';
 
@@ -300,6 +301,7 @@ export default function App() {
             />
           )}
           {view === 'review' && <ContentReviewView notify={notify} />}
+          {view === 'analyze' && <AnalyzeView notify={notify} />}
         </div>
       </main>
       <ReceiptDialog record={receiptRecord} onClose={() => setReceiptRecord(null)} notify={notify} />
