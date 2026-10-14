@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icons.jsx';
 import { buildFindings, formatTime } from '../analysis/findings.js';
+import { parseCaptions } from '../analysis/captions.js';
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
 const MAX_SAMPLES = 16;
@@ -35,17 +36,6 @@ async function captureFrame(video, canvas, context, time) {
     if (blob.size <= MAX_FRAME_BYTES) return blobToDataUrl(blob);
   }
   throw new Error('A frame is too large to send. Try a lower-resolution clip.');
-}
-
-// Turns an .srt / .vtt / plain text file into plain transcript text.
-export function parseCaptions(raw) {
-  return String(raw)
-    .split(/\r?\n/)
-    .filter(line => line.trim() && !/^WEBVTT/i.test(line) && !/^\d+$/.test(line.trim()) && !/-->/.test(line) && !/^NOTE\b/.test(line))
-    .map(line => line.replace(/<[^>]+>/g, '').trim())
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 async function postJson(url, body) {
