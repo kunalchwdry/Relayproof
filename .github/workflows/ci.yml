@@ -1,0 +1,72 @@
+name: CI
+
+# Runs on every push and pull request. Keys are never needed here: the NVIDIA routes are mocked in the browser test.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Unit tests (analysis, NIM routes, secret scanner)
+        run: |
+          npm run test:analysis
+          npm run test:nim
+          node --test test/bundle-secrets.test.mjs
+      - name: Build
+        run: npm run build
+      - name: Scan the bundle for credentials
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          FACT_CHECK_API_KEY: ${{ secrets.FACT_CHECK_API_KEY }}
+        run: node scripts/bundle-secrets.mjs dist
+
+  browser-test:
+    needs: unit-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --no-audit --no-fund
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: Make the test clips
+        run: |
+          scripts/make-test-clip.sh /tmp/clip.mp4
+      - name: Build and serve the app
+        run: |
+          npm run build
+          npx vite preview --host 127.0.0.1 --port 4173 --strictPort > /tmp/preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:4173/ > /dev/null && break; sleep 1; done
+      - name: Browser test (NVIDIA routes mocked)
+        env:
+          RELAYPROOF_URL: http://127.0.0.1:4173/
+          RELAYPROOF_VIDEO: /tmp/clip.mp4
+          RELAYPROOF_TRANSCRIPT: Guaranteed returns, send your OTP now.
+        run: npm run test:e2e
+      - if: failure()
+        run: cat /tmp/preview.log || true

@@ -17,7 +17,9 @@
     "test:analysis": "node --test test/findings.test.mjs test/captions.test.mjs test/nim-parse.test.mjs test/sampling.test.mjs test/request.test.mjs",
     "test:nim": "node --test test/nim-api.test.mjs test/analyze-frames-api.test.mjs",
     "verify:speech": "node scripts/verify-speech.mjs",
-    "test:e2e": "python3 test/e2e/analyze-browser.py"
+    "test:e2e": "python3 test/e2e/analyze-browser.py",
+    "test:clip": "scripts/make-test-clip.sh",
+    "scan:bundle": "node scripts/bundle-secrets.mjs dist"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.1",
