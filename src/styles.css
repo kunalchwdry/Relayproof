@@ -761,3 +761,11 @@ a:hover { color: var(--accent-2); }
 .transcript-lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; font-size: 0.92rem; line-height: 1.4; }
 .analyze-speech-toggle { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; margin: 6px 0; }
 .analyze-speech-toggle input { margin-top: 3px; }
+
+/* Content Credentials card */
+.provenance-head { margin: 8px 0 0; font-size: 13px; color: var(--ink); }
+.provenance-head.bad { color: #ffb4a6; }
+.provenance-details { display: grid; grid-template-columns: 1fr; gap: 6px; margin: 10px 0 0; }
+.provenance-details > div { display: grid; grid-template-columns: 140px 1fr; gap: 10px; font-size: 12px; }
+.provenance-details dt { color: var(--muted); }
+.provenance-details dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }

@@ -4,6 +4,7 @@ import { buildFindings, formatTime } from '../analysis/findings.js';
 import { parseCaptions } from '../analysis/captions.js';
 import { chooseSampleTimes, frameDifference } from '../analysis/sampling.js';
 import { postJson } from '../analysis/request.js';
+import { checkProvenance } from '../analysis/provenance.js';
 import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
@@ -92,7 +93,7 @@ export default function AnalyzeView({ notify }) {
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
-  const busy = phase === 'sampling' || phase === 'frames' || phase === 'speech' || phase === 'text';
+  const busy = ['provenance', 'sampling', 'frames', 'speech', 'text'].includes(phase);
   const findings = useMemo(() => (result ? buildFindings(result.frames, result.text) : null), [result]);
 
   function chooseVideo(next) {
@@ -132,6 +133,11 @@ export default function AnalyzeView({ notify }) {
     try {
       if (!Number.isFinite(video.duration) || video.duration <= 0) throw new Error('This video has no readable duration.');
       const length = video.duration;
+      // Reads Content Credentials in this browser. The file is not uploaded; the check never throws.
+      setPhase('provenance');
+      setProgress('Reading Content Credentials (C2PA) in this browser. The file is not uploaded.');
+      const credentials = await checkProvenance(file);
+      if (stale()) return;
       const count = Math.min(MAX_SAMPLES, Math.max(3, Math.ceil(length / 8) + 1));
 
       // Scan the clip with small thumbnails and keep the moments where the picture changes most, plus even coverage.
@@ -223,7 +229,7 @@ export default function AnalyzeView({ notify }) {
 
       const framesWithText = analysed.map(frame => ({ ...frame }));
       const transcriptSource = transcript.trim() ? 'typed' : speech ? 'speech' : null;
-      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length };
+      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length, provenance: credentials };
       setResult(nextResult);
       const built = buildFindings(framesWithText, text);
       setPhase('done');
@@ -400,6 +406,28 @@ export default function AnalyzeView({ notify }) {
                 </>
               )}
               {!result.transcriptSource && !result.speechError && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
+            </article>
+
+            <article className="panel result-block provenance-card">
+              <div className="section-kicker">CONTENT CREDENTIALS (C2PA)</div>
+              {result.provenance?.status === 'none' && <p className="analyze-empty">{result.provenance.note}</p>}
+              {result.provenance?.status === 'error' && <p className="inline-error" role="alert"><strong>{result.provenance.headline}.</strong> {result.provenance.note}</p>}
+              {result.provenance?.status === 'present' && (
+                <>
+                  <p className={`provenance-head ${result.provenance.aiDeclared ? 'bad' : ''}`}><strong>{result.provenance.headline}</strong></p>
+                  <dl className="provenance-details">
+                    {result.provenance.details.map(item => (
+                      <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>
+                    ))}
+                  </dl>
+                  {result.provenance.failures.length > 0 && (
+                    <ul className="finding-list">
+                      {result.provenance.failures.map((failure, index) => <li key={index} className="finding high">{failure}</li>)}
+                    </ul>
+                  )}
+                  <p className="analyze-empty">{result.provenance.note}</p>
+                </>
+              )}
             </article>
 
             <article className="panel result-block">
