@@ -1,4 +1,6 @@
 import { nimChat, webSearch, serpApiKey, NIM_SAFETY_MODEL, NIM_TEXT_MODEL, MAX_ANALYSIS_TEXT_CHARS, httpError, errorResponse, sendJson, parseJsonLoose } from '../../lib/nim.js';
+import { searchFactChecks, factCheckKey } from '../../lib/factcheck.js';
+import { gatherEvidence } from '../../lib/evidence.js';
 
 const MAX_CLAIMS = 4;
 const VERDICTS = ['supported', 'contradicted', 'misleading', 'unverifiable'];
@@ -90,25 +92,30 @@ export default async function handler(req, res) {
 
     const claims = [];
     for (const item of extracted.claims) {
-      const search = await webSearch(item.searchQuery, 3);
-      const judgement = await judgeClaim(item.claim, search.results);
+      // Published fact checks first, then live web search. Each claim records which one was used.
+      const evidence = await gatherEvidence(item.claim, { factCheck: searchFactChecks, webSearch, limit: 3 });
+      const judgement = await judgeClaim(item.claim, evidence.snippets);
       claims.push({
         claim: item.claim,
         ...judgement,
-        searchUsed: search.available,
-        searchError: search.error || null,
-        sources: search.results.map(({ title, link }) => ({ title, link })),
+        evidenceSource: evidence.evidenceSource,
+        evidenceLabel: evidence.evidenceLabel,
+        searchUsed: evidence.searchUsed,
+        searchError: evidence.searchError,
+        sources: evidence.sources,
       });
     }
 
+    const anyEvidence = Boolean(serpApiKey() || factCheckKey());
     return sendJson(res, 200, {
       safety,
       schemeFlags: extracted.schemeFlags,
       claims,
-      liveSearch: Boolean(serpApiKey()),
-      notice: serpApiKey()
-        ? 'Claims were checked against live web search snippets by an AI model. Verify important findings at the sources.'
-        : 'Live web search is not configured, so claims are unverifiable here. The model did not check them against the web.',
+      liveSearch: anyEvidence,
+      factCheckConfigured: Boolean(factCheckKey()),
+      notice: anyEvidence
+        ? 'Claims were checked against published fact checks or live web search snippets by an AI model. Verify important findings at the sources.'
+        : 'No evidence source is configured, so claims are unverifiable here. The model did not check them against the web.',
     });
   } catch (error) {
     return errorResponse(res, error);

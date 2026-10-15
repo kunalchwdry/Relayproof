@@ -774,3 +774,4 @@ a:hover { color: var(--accent-2); }
 .frame-thumb { display: block; width: 160px; max-width: 100%; border-radius: 8px; border: 1px solid var(--line); margin: 6px 0; }
 .frame-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 4px; font-size: 12px; }
 .frame-actions small { flex-basis: 100%; color: var(--muted); }
+.evidence-source { display: block; margin-top: 4px; color: var(--muted); }

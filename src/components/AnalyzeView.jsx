@@ -382,7 +382,8 @@ export default function AnalyzeView({ notify }) {
                           {claim.sources.map(source => <li key={source.link}><a href={source.link} target="_blank" rel="noreferrer">{source.title || source.link}</a></li>)}
                         </ul>
                       )}
-                      {claim.searchError && <small>Live search: {claim.searchError}</small>}
+                      {claim.evidenceLabel && <small className="evidence-source">Checked against: {claim.evidenceLabel}</small>}
+                      {claim.searchError && <small>Search note: {claim.searchError}</small>}
                     </li>
                   ))}
                 </ul>

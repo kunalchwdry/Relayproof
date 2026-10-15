@@ -15,7 +15,7 @@
     "test:server": "python3 -m unittest server.test_local_guard server.test_sbr_contract",
     "test:extension": "node --test test/extension-capture.test.mjs test/extension-credential-sync.test.mjs",
     "test:analysis": "node --test test/findings.test.mjs test/captions.test.mjs test/nim-parse.test.mjs test/sampling.test.mjs test/request.test.mjs test/provenance.test.mjs test/reverse-search.test.mjs",
-    "test:nim": "node --test test/nim-api.test.mjs test/analyze-frames-api.test.mjs",
+    "test:nim": "node --test test/nim-api.test.mjs test/analyze-frames-api.test.mjs test/evidence.test.mjs",
     "verify:speech": "node scripts/verify-speech.mjs",
     "test:e2e": "python3 test/e2e/analyze-browser.py",
     "test:clip": "scripts/make-test-clip.sh",
