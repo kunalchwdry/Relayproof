@@ -775,3 +775,4 @@ a:hover { color: var(--accent-2); }
 .frame-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 4px; font-size: 12px; }
 .frame-actions small { flex-basis: 100%; color: var(--muted); }
 .evidence-source { display: block; margin-top: 4px; color: var(--muted); }
+.analyze-cancel { margin-top: 10px; width: 100%; }

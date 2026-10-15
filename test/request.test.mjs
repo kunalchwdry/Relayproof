@@ -36,3 +36,25 @@ test('does not retry a client error such as 400', async () => {
   await assert.rejects(postJson('/x', {}, { fetchImpl, delayMs: 0 }), /bad frame/);
   assert.equal(calls.length, 1);
 });
+
+test('a cancelled request stops at once and is not retried', async () => {
+  const controller = new AbortController();
+  controller.abort();
+  const { fetchImpl, calls } = fakeFetch([{ status: 200, body: {} }]);
+  await assert.rejects(postJson('/x', {}, { fetchImpl, delayMs: 0, signal: controller.signal }), { name: 'AbortError' });
+  assert.equal(calls.length, 0);
+});
+
+test('cancelling during the wait before a retry stops the retry', async () => {
+  const controller = new AbortController();
+  const { fetchImpl, calls } = fakeFetch([{ status: 503, body: {} }, { status: 200, body: { ok: 3 } }]);
+  const pending = postJson('/x', {}, { fetchImpl, delayMs: 60_000, signal: controller.signal });
+  setTimeout(() => controller.abort(), 10);
+  await assert.rejects(pending, { name: 'AbortError' });
+  assert.equal(calls.length, 1);
+});
+
+test('an HTTP error carries its status so the page can explain it', async () => {
+  const { fetchImpl } = fakeFetch([{ status: 503, body: { detail: 'NVIDIA NIM is not configured on the server.' } }, { status: 503, body: { detail: 'NVIDIA NIM is not configured on the server.' } }]);
+  await assert.rejects(postJson('/x', {}, { fetchImpl, delayMs: 0 }), error => error.status === 503);
+});

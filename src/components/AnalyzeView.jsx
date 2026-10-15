@@ -91,6 +91,7 @@ export default function AnalyzeView({ notify }) {
   const fileInput = useRef(null);
   const captionInput = useRef(null);
   const runId = useRef(0);
+  const abortRef = useRef(null);
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
@@ -127,7 +128,11 @@ export default function AnalyzeView({ notify }) {
     const video = videoRef.current;
     if (!video || !file) return;
     const token = ++runId.current;
-    const stale = () => token !== runId.current;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    // A run is stale once it is cancelled or a newer run has started. Stale runs stop and keep nothing.
+    const stale = () => token !== runId.current || controller.signal.aborted;
     setError('');
     setResult(null);
     setPopupOpen(false);
@@ -190,7 +195,7 @@ export default function AnalyzeView({ notify }) {
         if (stale()) return;
         const batch = frames.slice(start, start + BATCH);
         setProgress(`Checking frames for illegal content, scams, and visual problems (${Math.min(start + BATCH, frames.length)} of ${frames.length})`);
-        const payload = await postJson('/api/nim/analyze-frames', { frames: batch });
+        const payload = await postJson('/api/nim/analyze-frames', { frames: batch }, { signal: controller.signal });
         analysed.push(...(payload.frames || []));
       }
 
@@ -224,7 +229,7 @@ export default function AnalyzeView({ notify }) {
       if (spoken || onScreen) {
         setPhase('text');
         setProgress('Checking the words for scams, unsafe content, and factual or logical problems');
-        text = await postJson('/api/nim/analyze-text', { transcript: spoken, onScreenText: onScreen });
+        text = await postJson('/api/nim/analyze-text', { transcript: spoken, onScreenText: onScreen }, { signal: controller.signal });
       }
       if (stale()) return;
 
@@ -240,11 +245,25 @@ export default function AnalyzeView({ notify }) {
       if (built.alerts.length) setPopupOpen(true);
       notify(built.alerts.length ? `${built.alerts.length} high-priority finding(s).` : 'Analysis finished. No high-priority findings.');
     } catch (err) {
-      if (stale()) return;
+      if (stale() || err?.name === 'AbortError') return;
       setPhase('error');
       setProgress('');
       setError(err instanceof Error ? err.message : 'Analysis failed.');
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
     }
+  }
+
+  // Stops the run at its next step: frame capture, each NVIDIA call, and the wait between retries.
+  // The in-browser speech model cannot be interrupted once it has started; its result is then discarded.
+  function cancel() {
+    if (!abortRef.current) return;
+    abortRef.current.abort();
+    runId.current += 1;
+    setPhase('idle');
+    setProgress('');
+    setError('');
+    notify('Analysis cancelled. Nothing was kept.');
   }
 
   function jump(time) {
@@ -335,6 +354,7 @@ export default function AnalyzeView({ notify }) {
           <button type="button" className="btn-glow analyze-run" onClick={analyse} disabled={!file || busy || !duration}>
             {busy ? 'Analysing…' : 'Analyse this clip'}
           </button>
+          {busy && <button type="button" className="btn-outline analyze-cancel" onClick={cancel}>Cancel analysis</button>}
           {busy && <div className="analyze-progress" role="status">{progress}</div>}
           {error && <div className="inline-error" role="alert">{error}</div>}
           <p className="analyze-privacy">Sent to NVIDIA NIM: up to 16 downscaled still frames and the text above. The full video is not uploaded. Do not use confidential clips.</p>
