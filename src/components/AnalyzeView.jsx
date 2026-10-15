@@ -8,6 +8,7 @@ import { checkProvenance } from '../analysis/provenance.js';
 import { REVERSE_IMAGE_SEARCHES, frameFileName } from '../analysis/reverseSearch.js';
 import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
 import { detectAudioTrack, describeAnalysisError, speechFailureMessage, ANALYSIS_LIMITS } from '../analysis/mediaCheck.js';
+import { buildReport, reportFileName } from '../analysis/report.js';
 
 const MAX_VIDEO_BYTES = ANALYSIS_LIMITS.maxVideoMb * 1024 * 1024;
 const MAX_CLIP_SECONDS = ANALYSIS_LIMITS.maxClipMinutes * 60;
@@ -273,6 +274,22 @@ export default function AnalyzeView({ notify }) {
     }
   }
 
+  // Downloads the findings as JSON. Frame pictures are not included.
+  function exportReport() {
+    if (!result) return;
+    const generatedAt = new Date().toISOString();
+    const report = buildReport({ clipName: file?.name, clipBytes: file?.size, result, findings, generatedAt });
+    const href = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = reportFileName(file?.name, generatedAt);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+    notify('Report downloaded.');
+  }
+
   // Stops the run at its next step: frame capture, each NVIDIA call, and the wait between retries.
   // The in-browser speech model cannot be interrupted once it has started; its result is then discarded.
   function cancel() {
@@ -395,6 +412,11 @@ export default function AnalyzeView({ notify }) {
             <div><strong>{findings.summary.claimsChecked}</strong><span>claims checked</span></div>
             <div className={findings.summary.contradicted ? 'bad' : ''}><strong>{findings.summary.contradicted}</strong><span>contradicted</span></div>
             <div><strong>{findings.summary.supported}</strong><span>supported</span></div>
+          </div>
+
+          <div className="report-actions">
+            <button type="button" className="btn-outline" onClick={exportReport}>Export report (JSON)</button>
+            <span className="analyze-hint">Includes every finding with its time, claims with sources, and the provenance result. Frame pictures are left out.</span>
           </div>
 
           <div className="analyze-cards">
