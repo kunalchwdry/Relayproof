@@ -7,8 +7,10 @@ import { postJson } from '../analysis/request.js';
 import { checkProvenance } from '../analysis/provenance.js';
 import { REVERSE_IMAGE_SEARCHES, frameFileName } from '../analysis/reverseSearch.js';
 import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
+import { detectAudioTrack, describeAnalysisError, speechFailureMessage, ANALYSIS_LIMITS } from '../analysis/mediaCheck.js';
 
-const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+const MAX_VIDEO_BYTES = ANALYSIS_LIMITS.maxVideoMb * 1024 * 1024;
+const MAX_CLIP_SECONDS = ANALYSIS_LIMITS.maxClipMinutes * 60;
 const MAX_SAMPLES = 16;
 const MAX_SCAN = 180; // thumbnails compared per clip, at most
 const BATCH = 4;
@@ -91,6 +93,9 @@ export default function AnalyzeView({ notify }) {
   const fileInput = useRef(null);
   const captionInput = useRef(null);
   const runId = useRef(0);
+  const pickRef = useRef(0);
+  const [audioTrack, setAudioTrack] = useState(null);
+  const [playbackError, setPlaybackError] = useState('');
   const abortRef = useRef(null);
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
@@ -114,7 +119,11 @@ export default function AnalyzeView({ notify }) {
     setDuration(0);
     setResult(null);
     setError('');
+    setPlaybackError('');
     setPhase('idle');
+    setAudioTrack(null);
+    const pick = ++pickRef.current;
+    detectAudioTrack(next).then(track => { if (pick === pickRef.current) setAudioTrack(track); }).catch(() => {});
   }
 
   async function loadCaptions(next) {
@@ -137,8 +146,10 @@ export default function AnalyzeView({ notify }) {
     setResult(null);
     setPopupOpen(false);
     try {
-      if (!Number.isFinite(video.duration) || video.duration <= 0) throw new Error('This video has no readable duration.');
+      if (playbackError) throw new Error(playbackError);
+      if (!Number.isFinite(video.duration) || video.duration <= 0) throw new Error('This video has no readable duration. The format may not be supported in this browser.');
       const length = video.duration;
+      if (length > MAX_CLIP_SECONDS) throw new Error(`This clip is longer than ${ANALYSIS_LIMITS.maxClipMinutes} minutes. Trim it and try again.`);
       // Reads Content Credentials in this browser. The file is not uploaded; the check never throws.
       setPhase('provenance');
       setProgress('Reading Content Credentials (C2PA) in this browser. The file is not uploaded.');
@@ -207,21 +218,27 @@ export default function AnalyzeView({ notify }) {
       if (!spoken && useSpeech) {
         setPhase('speech');
         try {
-          const audio = await decodeAudio(file);
-          if (stale()) return;
-          if (audio.seconds === 0) {
-            speechError = 'This file has no audio track, so there were no spoken words to check.';
-          } else if (audio.seconds > MAX_SPEECH_SECONDS) {
-            speechError = 'The clip is longer than 40 minutes, so its speech was not transcribed. Paste a transcript instead.';
+          if (audioTrack === 'absent') {
+            speechError = 'This clip has no sound track, so there were no spoken words to check.';
           } else {
-            const transcribed = await transcribeAudio(audio.samples, { onStatus: message => { if (!stale()) setProgress(message); } });
+            const audio = await decodeAudio(file);
             if (stale()) return;
-            spoken = transcribed.text;
-            speech = transcribed.segments;
+            if (audio.failed) {
+              speechError = 'This browser could not read the audio in this file (the format may not be supported). Paste a transcript instead.';
+            } else if (audio.seconds === 0) {
+              speechError = 'This clip has no sound track, so there were no spoken words to check.';
+            } else if (audio.seconds > MAX_SPEECH_SECONDS) {
+              speechError = `The clip is longer than ${ANALYSIS_LIMITS.speechMinutes} minutes, so its speech was not transcribed. Paste a transcript instead.`;
+            } else {
+              const transcribed = await transcribeAudio(audio.samples, { onStatus: message => { if (!stale()) setProgress(message); } });
+              if (stale()) return;
+              spoken = transcribed.text;
+              speech = transcribed.segments;
+            }
           }
         } catch (err) {
           if (stale()) return;
-          speechError = `Speech-to-text could not run: ${err instanceof Error ? err.message : 'unknown error'}. Paste a transcript to check the words.`;
+          speechError = speechFailureMessage(err);
         }
       }
 
@@ -237,7 +254,7 @@ export default function AnalyzeView({ notify }) {
       const pictureAt = new Map(frames.map(frame => [frame.timestampSeconds, frame.dataUrl]));
       const framesWithText = analysed.map(frame => ({ ...frame, dataUrl: pictureAt.get(frame.timestampSeconds) || null }));
       const transcriptSource = transcript.trim() ? 'typed' : speech ? 'speech' : null;
-      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length, provenance: credentials };
+      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length, provenance: credentials, audioTrack };
       setResult(nextResult);
       const built = buildFindings(framesWithText, text);
       setPhase('done');
@@ -245,10 +262,12 @@ export default function AnalyzeView({ notify }) {
       if (built.alerts.length) setPopupOpen(true);
       notify(built.alerts.length ? `${built.alerts.length} high-priority finding(s).` : 'Analysis finished. No high-priority findings.');
     } catch (err) {
-      if (stale() || err?.name === 'AbortError') return;
+      if (stale()) return;
+      const message = describeAnalysisError(err);
+      if (message === null) return;
       setPhase('error');
       setProgress('');
-      setError(err instanceof Error ? err.message : 'Analysis failed.');
+      setError(message);
     } finally {
       if (abortRef.current === controller) abortRef.current = null;
     }
@@ -292,7 +311,7 @@ export default function AnalyzeView({ notify }) {
             <button type="button" className="analyze-drop" onClick={() => fileInput.current?.click()}>
               <Icon name="check" size={22} />
               <strong>Choose a video</strong>
-              <span>MP4, WebM, MOV, MKV · up to 500 MB · stays in this browser until you analyse</span>
+              <span>MP4, WebM, MOV, MKV · up to 500 MB and 60 minutes · stays in this browser until you analyse</span>
             </button>
           ) : (
             <video
@@ -303,6 +322,7 @@ export default function AnalyzeView({ notify }) {
               playsInline
               preload="metadata"
               onLoadedMetadata={event => setDuration(event.currentTarget.duration)}
+              onError={() => setPlaybackError('This browser cannot play this video. The format or codec may not be supported (H.265/HEVC often is not). Convert it to MP4 with H.264 video and try again.')}
             />
           )}
           <input ref={fileInput} type="file" accept="video/*,.mp4,.webm,.mov,.mkv,.m4v" className="hidden-file" onChange={event => { chooseVideo(event.target.files[0]); event.target.value = ''; }} />
@@ -336,6 +356,10 @@ export default function AnalyzeView({ notify }) {
             <input type="checkbox" checked={useSpeech} onChange={event => setUseSpeech(event.target.checked)} disabled={Boolean(transcript.trim())} />
             <span>Transcribe the speech in this browser (downloads about 41 MB the first time, English only)</span>
           </label>
+          {duration > ANALYSIS_LIMITS.longSpeechHintMinutes * 60 && useSpeech && (
+            <p className="analyze-hint">This clip is over {ANALYSIS_LIMITS.longSpeechHintMinutes} minutes. On a laptop with 8 GB of memory or less, transcribing it can run out of memory. If that happens, paste a transcript.</p>
+          )}
+          {audioTrack === 'absent' && <p className="analyze-hint">This clip has no sound track.</p>}
           <p className="analyze-hint">Or paste a transcript, or upload captions (.srt, .vtt, .txt). Typed text always wins over the browser transcript.</p>
           <textarea
             className="analyze-transcript"
@@ -351,7 +375,9 @@ export default function AnalyzeView({ notify }) {
           </div>
           <input ref={captionInput} type="file" accept=".srt,.vtt,.txt" className="hidden-file" onChange={event => { loadCaptions(event.target.files[0]); event.target.value = ''; }} />
 
-          <button type="button" className="btn-glow analyze-run" onClick={analyse} disabled={!file || busy || !duration}>
+          {playbackError && <div className="inline-error" role="alert">{playbackError}</div>}
+          {duration > MAX_CLIP_SECONDS && <div className="inline-error" role="alert">This clip is longer than {ANALYSIS_LIMITS.maxClipMinutes} minutes. Trim it to analyse it.</div>}
+          <button type="button" className="btn-glow analyze-run" onClick={analyse} disabled={!file || busy || !duration || Boolean(playbackError) || duration > MAX_CLIP_SECONDS}>
             {busy ? 'Analysing…' : 'Analyse this clip'}
           </button>
           {busy && <button type="button" className="btn-outline analyze-cancel" onClick={cancel}>Cancel analysis</button>}
@@ -429,7 +455,8 @@ export default function AnalyzeView({ notify }) {
                   )}
                 </>
               )}
-              {!result.transcriptSource && !result.speechError && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
+              {!result.transcriptSource && !result.speechError && result.audioTrack === 'absent' && <p className="analyze-empty">This clip has no sound track, so there were no spoken words to check.</p>}
+              {!result.transcriptSource && !result.speechError && result.audioTrack !== 'absent' && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
             </article>
 
             <article className="panel result-block provenance-card">

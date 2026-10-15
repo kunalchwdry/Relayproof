@@ -12,7 +12,7 @@ export const SPEECH_MODEL = {
 };
 
 // Longer clips are slow on a laptop CPU and hold a lot of audio in memory. Above this, the user pastes a transcript instead.
-export const MAX_SPEECH_SECONDS = 40 * 60;
+export const MAX_SPEECH_SECONDS = 40 * 60; // keep in step with ANALYSIS_LIMITS.speechMinutes in mediaCheck.js
 const SAMPLE_RATE = 16000;
 
 let asrPromise = null;
@@ -38,7 +38,7 @@ function loadAsr(onProgress) {
 }
 
 // Decodes the audio track of a video or audio file to 16 kHz mono PCM.
-// Returns { samples: Float32Array, seconds }. Samples are empty if the file has no audio track.
+// Returns { samples: Float32Array, seconds, failed? }. Samples are empty if there is no audio or it could not be decoded.
 export async function decodeAudio(file) {
   const context = new AudioContext({ sampleRate: SAMPLE_RATE });
   try {
@@ -51,7 +51,8 @@ export async function decodeAudio(file) {
     }
     return { samples: mono, seconds: buffer.length / SAMPLE_RATE };
   } catch {
-    return { samples: new Float32Array(0), seconds: 0 };
+    // The browser could not decode the audio (unsupported format). Reported separately from a silent file.
+    return { samples: new Float32Array(0), seconds: 0, failed: true };
   } finally {
     await context.close();
   }
