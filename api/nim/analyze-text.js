@@ -90,12 +90,12 @@ export default async function handler(req, res) {
 
     const [safety, extracted] = await Promise.all([safetyCheck(combined), extractClaims(combined)]);
 
-    const claims = [];
-    for (const item of extracted.claims) {
-      // Published fact checks first, then live web search. Each claim records which one was used.
+    // Claims are checked in parallel so the whole request fits in the serverless time limit (60 s).
+    // Each claim tries published fact checks first, then live web search, and records which one it used.
+    const claims = await Promise.all(extracted.claims.map(async item => {
       const evidence = await gatherEvidence(item.claim, { factCheck: searchFactChecks, webSearch, limit: 3 });
       const judgement = await judgeClaim(item.claim, evidence.snippets);
-      claims.push({
+      return {
         claim: item.claim,
         ...judgement,
         evidenceSource: evidence.evidenceSource,
@@ -103,8 +103,8 @@ export default async function handler(req, res) {
         searchUsed: evidence.searchUsed,
         searchError: evidence.searchError,
         sources: evidence.sources,
-      });
-    }
+      };
+    }));
 
     const anyEvidence = Boolean(serpApiKey() || factCheckKey());
     return sendJson(res, 200, {
