@@ -755,3 +755,9 @@ a:hover { color: var(--accent-2); }
   .analyze-view .analyze-grid, .analyze-cards { grid-template-columns: 1fr; }
   .analyze-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Automatic transcript (in-browser speech-to-text) */
+.transcript-lines { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; max-height: 320px; overflow: auto; }
+.transcript-lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; font-size: 0.92rem; line-height: 1.4; }
+.analyze-speech-toggle { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; margin: 6px 0; }
+.analyze-speech-toggle input { margin-top: 3px; }

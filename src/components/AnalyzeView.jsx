@@ -2,9 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icons.jsx';
 import { buildFindings, formatTime } from '../analysis/findings.js';
 import { parseCaptions } from '../analysis/captions.js';
+import { chooseSampleTimes, frameDifference } from '../analysis/sampling.js';
+import { postJson } from '../analysis/request.js';
+import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
 const MAX_SAMPLES = 16;
+const MAX_SCAN = 180; // thumbnails compared per clip, at most
 const BATCH = 4;
 const MAX_FRAME_BYTES = 480 * 1024;
 const VIDEO_EXTENSION = /\.(mp4|mov|m4v|webm|mkv|avi|mpeg|mpg)$/i;
@@ -36,13 +40,6 @@ async function captureFrame(video, canvas, context, time) {
     if (blob.size <= MAX_FRAME_BYTES) return blobToDataUrl(blob);
   }
   throw new Error('A frame is too large to send. Try a lower-resolution clip.');
-}
-
-async function postJson(url, body) {
-  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.detail || `The analysis service returned HTTP ${response.status}.`);
-  return payload;
 }
 
 function AlertPopup({ alerts, onJump, onClose }) {
@@ -82,6 +79,7 @@ export default function AnalyzeView({ notify }) {
   const [url, setUrl] = useState('');
   const [duration, setDuration] = useState(0);
   const [transcript, setTranscript] = useState('');
+  const [useSpeech, setUseSpeech] = useState(false);
   const [phase, setPhase] = useState('idle');
   const [progress, setProgress] = useState('');
   const [error, setError] = useState('');
@@ -94,7 +92,7 @@ export default function AnalyzeView({ notify }) {
 
   useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
 
-  const busy = phase === 'sampling' || phase === 'frames' || phase === 'text';
+  const busy = phase === 'sampling' || phase === 'frames' || phase === 'speech' || phase === 'text';
   const findings = useMemo(() => (result ? buildFindings(result.frames, result.text) : null), [result]);
 
   function chooseVideo(next) {
@@ -135,7 +133,34 @@ export default function AnalyzeView({ notify }) {
       if (!Number.isFinite(video.duration) || video.duration <= 0) throw new Error('This video has no readable duration.');
       const length = video.duration;
       const count = Math.min(MAX_SAMPLES, Math.max(3, Math.ceil(length / 8) + 1));
-      const times = Array.from({ length: count }, (_, i) => Math.max(0.1, Math.min(length - 0.2, (length * i) / (count - 1))));
+
+      // Scan the clip with small thumbnails and keep the moments where the picture changes most, plus even coverage.
+      // Only the chosen moments are captured at full size and sent for analysis.
+      const scanStep = Math.max(2, length / MAX_SCAN);
+      const scanTimes = [];
+      for (let t = 0.1; t < length - 0.2; t += scanStep) scanTimes.push(Number(t.toFixed(2)));
+      const thumb = document.createElement('canvas');
+      thumb.width = 48;
+      thumb.height = Math.max(1, Math.round((48 * (video.videoHeight || 540)) / (video.videoWidth || 960)));
+      const thumbContext = thumb.getContext('2d', { willReadFrequently: true });
+      const candidates = [];
+      let previous = null;
+      setPhase('sampling');
+      for (let i = 0; i < scanTimes.length; i += 1) {
+        if (stale()) return;
+        setProgress(`Scanning the clip for scene changes: ${i + 1} of ${scanTimes.length}`);
+        await seekTo(video, scanTimes[i]);
+        thumbContext.drawImage(video, 0, 0, thumb.width, thumb.height);
+        const pixels = thumbContext.getImageData(0, 0, thumb.width, thumb.height).data;
+        const gray = new Uint8Array(thumb.width * thumb.height);
+        for (let p = 0, g = 0; p < pixels.length; p += 4, g += 1) {
+          gray[g] = (pixels[p] * 299 + pixels[p + 1] * 587 + pixels[p + 2] * 114) / 1000;
+        }
+        candidates.push({ time: scanTimes[i], diff: previous ? frameDifference(previous, gray) : 0 });
+        previous = gray;
+      }
+      let times = chooseSampleTimes(candidates, count, length).map(t => Math.max(0.1, Math.min(length - 0.2, t)));
+      if (times.length === 0) times = [0.1];
       const canvas = document.createElement('canvas');
       const scale = Math.min(1, 960 / Math.max(video.videoWidth || 960, video.videoHeight || 540));
       canvas.width = Math.max(1, Math.round((video.videoWidth || 960) * scale));
@@ -163,7 +188,31 @@ export default function AnalyzeView({ notify }) {
       }
 
       const onScreen = analysed.filter(frame => frame.onScreenText).map(frame => `[${formatTime(frame.timestampSeconds)}] ${frame.onScreenText}`).join('\n');
-      const spoken = transcript.trim();
+      // Typed or uploaded transcript wins. Otherwise transcribe the audio in this browser (nothing is uploaded for this step).
+      let spoken = transcript.trim();
+      let speech = null;
+      let speechError = '';
+      if (!spoken && useSpeech) {
+        setPhase('speech');
+        try {
+          const audio = await decodeAudio(file);
+          if (stale()) return;
+          if (audio.seconds === 0) {
+            speechError = 'This file has no audio track, so there were no spoken words to check.';
+          } else if (audio.seconds > MAX_SPEECH_SECONDS) {
+            speechError = 'The clip is longer than 40 minutes, so its speech was not transcribed. Paste a transcript instead.';
+          } else {
+            const transcribed = await transcribeAudio(audio.samples, { onStatus: message => { if (!stale()) setProgress(message); } });
+            if (stale()) return;
+            spoken = transcribed.text;
+            speech = transcribed.segments;
+          }
+        } catch (err) {
+          if (stale()) return;
+          speechError = `Speech-to-text could not run: ${err instanceof Error ? err.message : 'unknown error'}. Paste a transcript to check the words.`;
+        }
+      }
+
       let text = null;
       if (spoken || onScreen) {
         setPhase('text');
@@ -173,7 +222,8 @@ export default function AnalyzeView({ notify }) {
       if (stale()) return;
 
       const framesWithText = analysed.map(frame => ({ ...frame }));
-      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), duration: length };
+      const transcriptSource = transcript.trim() ? 'typed' : speech ? 'speech' : null;
+      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length };
       setResult(nextResult);
       const built = buildFindings(framesWithText, text);
       setPhase('done');
@@ -254,7 +304,11 @@ export default function AnalyzeView({ notify }) {
 
         <article className="panel analyze-side-panel">
           <div className="section-kicker">SPOKEN WORDS</div>
-          <p className="analyze-hint">Speech-to-text is not connected yet. Paste the transcript, or upload captions (.srt, .vtt, .txt).</p>
+          <label className="analyze-speech-toggle">
+            <input type="checkbox" checked={useSpeech} onChange={event => setUseSpeech(event.target.checked)} disabled={Boolean(transcript.trim())} />
+            <span>Transcribe the speech in this browser (downloads about 41 MB the first time, English only)</span>
+          </label>
+          <p className="analyze-hint">Or paste a transcript, or upload captions (.srt, .vtt, .txt). Typed text always wins over the browser transcript.</p>
           <textarea
             className="analyze-transcript"
             rows={7}
@@ -324,6 +378,28 @@ export default function AnalyzeView({ notify }) {
                   ))}
                 </ul>
               )}
+            </article>
+
+            <article className="panel result-block">
+              <div className="section-kicker">SPOKEN WORDS</div>
+              {result.speechError && <p className="inline-error" role="alert">{result.speechError}</p>}
+              {result.transcriptSource === 'typed' && <p className="analyze-empty">Checked your typed or uploaded transcript.</p>}
+              {result.transcriptSource === 'speech' && (
+                <>
+                  <p className="analyze-empty">Transcribed in your browser with {SPEECH_MODEL.label} ({SPEECH_MODEL.license}). Errors are likely, especially in noisy audio or Hindi. Check it against the clip.</p>
+                  {result.speech.length === 0 ? <p className="analyze-empty">No speech was recognised.</p> : (
+                    <ul className="transcript-lines">
+                      {result.speech.map((segment, index) => (
+                        <li key={`seg-${index}`}>
+                          <button type="button" className="text-button" onClick={() => jump(segment.start)}>{formatTime(segment.start)}</button>
+                          <span>{segment.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+              {!result.transcriptSource && !result.speechError && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
             </article>
 
             <article className="panel result-block">
