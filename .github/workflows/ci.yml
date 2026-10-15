@@ -78,5 +78,10 @@ jobs:
           RELAYPROOF_URL: http://127.0.0.1:4173/
           RELAYPROOF_VIDEO: /tmp/clip.mp4
         run: npm run test:e2e:nim-down
+      - name: Browser test, all-black clip is stopped before any frame is sent
+        env:
+          RELAYPROOF_URL: http://127.0.0.1:4173/
+          RELAYPROOF_VIDEO: ${{ github.workspace }}/test/fixtures/black-video.mp4
+        run: npm run test:e2e:blank
       - if: failure()
         run: cat /tmp/preview.log || true
