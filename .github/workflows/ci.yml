@@ -68,5 +68,15 @@ jobs:
           RELAYPROOF_VIDEO: /tmp/clip.mp4
           RELAYPROOF_TRANSCRIPT: Guaranteed returns, send your OTP now.
         run: npm run test:e2e
+      - name: Browser test, clip with no sound track
+        env:
+          RELAYPROOF_URL: http://127.0.0.1:4173/
+          RELAYPROOF_VIDEO: ${{ github.workspace }}/test/fixtures/silent-video.mp4
+        run: npm run test:e2e:silent
+      - name: Browser test, NVIDIA unavailable
+        env:
+          RELAYPROOF_URL: http://127.0.0.1:4173/
+          RELAYPROOF_VIDEO: /tmp/clip.mp4
+        run: npm run test:e2e:nim-down
       - if: failure()
         run: cat /tmp/preview.log || true

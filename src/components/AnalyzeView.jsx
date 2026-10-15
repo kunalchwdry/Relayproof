@@ -47,10 +47,53 @@ async function captureFrame(video, canvas, context, time) {
   throw new Error('A frame is too large to send. Try a lower-resolution clip.');
 }
 
+// Keyboard rules: focus moves into the pop-up when it opens, Tab and Shift+Tab stay inside it, Escape closes it,
+// and focus goes back to the control that opened it.
 function AlertPopup({ alerts, onJump, onClose }) {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const opener = document.activeElement;
+    const focusable = () => Array.from(dialog.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')).filter(el => !el.disabled);
+    const first = focusable()[0];
+    (first || dialog).focus();
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (items.length === 0) { event.preventDefault(); dialog.focus(); return; }
+      const head = items[0];
+      const tail = items[items.length - 1];
+      const inside = dialog.contains(document.activeElement);
+      if (event.shiftKey && (!inside || document.activeElement === head)) {
+        event.preventDefault();
+        tail.focus();
+      } else if (!event.shiftKey && (!inside || document.activeElement === tail)) {
+        event.preventDefault();
+        head.focus();
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      // If the opener is gone or disabled (the Analyse button is disabled while a run is going), use the page heading.
+      const usable = opener && opener !== document.body && document.contains(opener) && !opener.disabled && typeof opener.focus === 'function';
+      (usable ? opener : document.getElementById('analyze-title'))?.focus();
+    };
+  }, []);
+
   return (
     <div className="alert-overlay" role="presentation">
-      <div className="alert-dialog" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-desc">
+      <div ref={dialogRef} tabIndex={-1} className="alert-dialog" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-desc">
         <div className="alert-head">
           <span className="alert-icon"><Icon name="shield" size={18} /></span>
           <div>
@@ -216,18 +259,19 @@ export default function AnalyzeView({ notify }) {
       let spoken = transcript.trim();
       let speech = null;
       let speechError = '';
+      let speechNotice = '';
       if (!spoken && useSpeech) {
         setPhase('speech');
         try {
           if (audioTrack === 'absent') {
-            speechError = 'This clip has no sound track, so there were no spoken words to check.';
+            speechNotice = 'This clip has no sound track, so there were no spoken words to check.';
           } else {
             const audio = await decodeAudio(file);
             if (stale()) return;
             if (audio.failed) {
               speechError = 'This browser could not read the audio in this file (the format may not be supported). Paste a transcript instead.';
             } else if (audio.seconds === 0) {
-              speechError = 'This clip has no sound track, so there were no spoken words to check.';
+              speechNotice = 'This clip has no sound track, so there were no spoken words to check.';
             } else if (audio.seconds > MAX_SPEECH_SECONDS) {
               speechError = `The clip is longer than ${ANALYSIS_LIMITS.speechMinutes} minutes, so its speech was not transcribed. Paste a transcript instead.`;
             } else {
@@ -255,7 +299,7 @@ export default function AnalyzeView({ notify }) {
       const pictureAt = new Map(frames.map(frame => [frame.timestampSeconds, frame.dataUrl]));
       const framesWithText = analysed.map(frame => ({ ...frame, dataUrl: pictureAt.get(frame.timestampSeconds) || null }));
       const transcriptSource = transcript.trim() ? 'typed' : speech ? 'speech' : null;
-      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length, provenance: credentials, audioTrack };
+      const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, speechNotice, duration: length, provenance: credentials, audioTrack };
       setResult(nextResult);
       const built = buildFindings(framesWithText, text);
       setPhase('done');
@@ -317,8 +361,8 @@ export default function AnalyzeView({ notify }) {
       <div className="section-heading">
         <div>
           <div className="section-kicker">VIDEO ANALYSIS</div>
-          <h2 id="analyze-title">Play a clip and check what it shows and says.</h2>
-          <p>The clip is stepped through frame by frame in your browser. Frames go to NVIDIA NIM for reading and safety checks. Speech needs a transcript for now (paste text or upload captions).</p>
+          <h2 id="analyze-title" tabIndex={-1}>Play a clip and check what it shows and says.</h2>
+          <p>The clip is stepped through frame by frame in your browser. Frames go to NVIDIA NIM for reading and safety checks. Speech is transcribed in your browser when you tick the box, or you can paste a transcript. Limits: 500 MB and 60 minutes.</p>
         </div>
       </div>
 
@@ -460,6 +504,7 @@ export default function AnalyzeView({ notify }) {
 
             <article className="panel result-block">
               <div className="section-kicker">SPOKEN WORDS</div>
+              {result.speechNotice && <p className="analyze-empty">{result.speechNotice}</p>}
               {result.speechError && <p className="inline-error" role="alert">{result.speechError}</p>}
               {result.transcriptSource === 'typed' && <p className="analyze-empty">Checked your typed or uploaded transcript.</p>}
               {result.transcriptSource === 'speech' && (
@@ -477,8 +522,7 @@ export default function AnalyzeView({ notify }) {
                   )}
                 </>
               )}
-              {!result.transcriptSource && !result.speechError && result.audioTrack === 'absent' && <p className="analyze-empty">This clip has no sound track, so there were no spoken words to check.</p>}
-              {!result.transcriptSource && !result.speechError && result.audioTrack !== 'absent' && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
+              {!result.transcriptSource && !result.speechError && !result.speechNotice && <p className="analyze-empty">No spoken words to check. Tick the browser transcription box, or paste a transcript.</p>}
             </article>
 
             <article className="panel result-block provenance-card">

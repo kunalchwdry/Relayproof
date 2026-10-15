@@ -74,6 +74,7 @@ export function buildReport({ clipName, clipBytes = 0, result, findings, generat
       ? (result.speech || []).map(segment => ({ start: segment.start, end: segment.end, text: segment.text }))
       : null,
     speechError: result?.speechError || null,
+    speechNotice: result?.speechNotice || null,
     notices: REPORT_NOTICES,
   };
 }

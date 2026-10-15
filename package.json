@@ -19,7 +19,9 @@
     "verify:speech": "node scripts/verify-speech.mjs",
     "test:e2e": "python3 test/e2e/analyze-browser.py",
     "test:clip": "scripts/make-test-clip.sh",
-    "scan:bundle": "node scripts/bundle-secrets.mjs dist"
+    "scan:bundle": "node scripts/bundle-secrets.mjs dist",
+    "test:e2e:silent": "RELAYPROOF_SILENT=1 python3 test/e2e/analyze-browser.py",
+    "test:e2e:nim-down": "RELAYPROOF_NIM_DOWN=1 python3 test/e2e/analyze-browser.py"
   },
   "dependencies": {
     "@contentauth/c2pa-web": "^0.15.3",

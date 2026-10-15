@@ -778,3 +778,7 @@ a:hover { color: var(--accent-2); }
 .analyze-cancel { margin-top: 10px; width: 100%; }
 .report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 14px 0 4px; }
 .report-actions .analyze-hint { margin: 0; }
+/* Results on the analysis page: larger section labels (the default 8 px is hard to read) */
+.analyze-view .section-kicker { font-size: 10px; }
+.alert-dialog:focus { outline: none; }
+.alert-dialog button:focus-visible, .analyze-view button:focus-visible, .analyze-view a:focus-visible { outline: 2px solid var(--brass-light); outline-offset: 2px; }
