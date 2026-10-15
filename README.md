@@ -35,6 +35,7 @@ The browser tests need `RELAYPROOF_URL` (for example `http://127.0.0.1:4173/` af
 
 ## Documentation
 
+- [docs/USER_GUIDE.md](docs/USER_GUIDE.md): one-page guide for people using the video analysis page.
 - [docs/ANALYSIS.md](docs/ANALYSIS.md): how video analysis works, what raises alerts, what was tested, and what is not verified.
 - [docs/PATH_TO_8_5.md](docs/PATH_TO_8_5.md): the scoring rubric and the plan for the next stage.
 - [GO_TO_MARKET.md](GO_TO_MARKET.md): market and go-to-market notes.
