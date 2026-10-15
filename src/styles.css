@@ -769,3 +769,8 @@ a:hover { color: var(--accent-2); }
 .provenance-details > div { display: grid; grid-template-columns: 140px 1fr; gap: 10px; font-size: 12px; }
 .provenance-details dt { color: var(--muted); }
 .provenance-details dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+
+/* Frame log: thumbnails, download and reverse-image search links */
+.frame-thumb { display: block; width: 160px; max-width: 100%; border-radius: 8px; border: 1px solid var(--line); margin: 6px 0; }
+.frame-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin-top: 4px; font-size: 12px; }
+.frame-actions small { flex-basis: 100%; color: var(--muted); }

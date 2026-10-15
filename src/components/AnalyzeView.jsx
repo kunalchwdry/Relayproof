@@ -5,6 +5,7 @@ import { parseCaptions } from '../analysis/captions.js';
 import { chooseSampleTimes, frameDifference } from '../analysis/sampling.js';
 import { postJson } from '../analysis/request.js';
 import { checkProvenance } from '../analysis/provenance.js';
+import { REVERSE_IMAGE_SEARCHES, frameFileName } from '../analysis/reverseSearch.js';
 import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
@@ -227,7 +228,9 @@ export default function AnalyzeView({ notify }) {
       }
       if (stale()) return;
 
-      const framesWithText = analysed.map(frame => ({ ...frame }));
+      // Keep each frame's picture next to its findings, so the user can download it and run a reverse-image search.
+      const pictureAt = new Map(frames.map(frame => [frame.timestampSeconds, frame.dataUrl]));
+      const framesWithText = analysed.map(frame => ({ ...frame, dataUrl: pictureAt.get(frame.timestampSeconds) || null }));
       const transcriptSource = transcript.trim() ? 'typed' : speech ? 'speech' : null;
       const nextResult = { frames: framesWithText, text, transcriptProvided: Boolean(spoken), transcriptSource, speech, speechError, duration: length, provenance: credentials };
       setResult(nextResult);
@@ -451,7 +454,17 @@ export default function AnalyzeView({ notify }) {
                 {result.frames.map((frame, index) => (
                   <li key={`frame-${index}`} className="finding low">
                     <button type="button" className="text-button" onClick={() => jump(frame.timestampSeconds)}>{formatTime(frame.timestampSeconds)}</button>
+                    {frame.dataUrl && <img className="frame-thumb" src={frame.dataUrl} alt={`Frame at ${formatTime(frame.timestampSeconds)}`} />}
                     <span>{frame.onScreenText || 'No on-screen text'}</span>
+                    {frame.dataUrl && (
+                      <div className="frame-actions">
+                        <a className="text-button" href={frame.dataUrl} download={frameFileName(file?.name, frame.timestampSeconds)}>Download frame</a>
+                        {REVERSE_IMAGE_SEARCHES.map(engine => (
+                          <a key={engine.id} className="text-button" href={engine.url} target="_blank" rel="noreferrer" title={engine.howTo}>Search with {engine.name}</a>
+                        ))}
+                        <small>Download the frame, then upload it on the search page.</small>
+                      </div>
+                    )}
                     {frame.issues.map((issue, i) => <small key={i} className={`issue-tag ${issue.severity}`}>{issue.category.replace(/_/g, ' ')} · {issue.severity}</small>)}
                     {frame.error && <small>Frame could not be analysed: {frame.error}</small>}
                   </li>
