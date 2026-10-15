@@ -69,3 +69,15 @@ export function speechFailureMessage(error) {
   }
   return `Speech-to-text could not run: ${error instanceof Error ? error.message : 'unknown error'}. Paste a transcript to check the words.`;
 }
+
+// A browser that cannot decode a codec (H.265/HEVC is common) still gives a duration, but every frame comes out black.
+// If the scanned thumbnails are all near-black, the picture was not decoded (or the clip really is black).
+export const BLANK_PICTURE_LUMA = 8;
+
+export function pictureLooksBlank(meanLumas) {
+  if (!meanLumas || meanLumas.length === 0) return false;
+  return Math.max(...meanLumas) < BLANK_PICTURE_LUMA;
+}
+
+export const BLANK_PICTURE_MESSAGE =
+  'Every frame of this clip came out black, so there was nothing to check, and nothing was sent. The browser probably cannot decode this video (H.265/HEVC is often not supported). Convert it to MP4 with H.264 video and try again.';

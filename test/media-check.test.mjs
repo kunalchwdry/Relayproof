@@ -49,3 +49,11 @@ test('a real silent video is reported as having no sound track', async () => {
   const file = new File([silent], 'silent.mp4', { type: 'video/mp4' });
   assert.equal(await detectAudioTrack(file, { chunkBytes: 4096 }), 'absent');
 });
+
+import { pictureLooksBlank, BLANK_PICTURE_LUMA } from '../src/analysis/mediaCheck.js';
+test('a clip whose scanned frames are all near-black is flagged as not decoded', () => {
+  assert.equal(pictureLooksBlank([1, 1, 2, 1]), true);
+  assert.equal(pictureLooksBlank([1, 120, 2]), false, 'one bright frame means the picture decoded');
+  assert.equal(pictureLooksBlank([]), false);
+  assert.ok(BLANK_PICTURE_LUMA > 2 && BLANK_PICTURE_LUMA < 40);
+});

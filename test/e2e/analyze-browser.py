@@ -18,6 +18,7 @@ Checks (mocked NVIDIA by default):
   4. Export report downloads a JSON report with findings and no frame pictures.
   5. (RELAYPROOF_SILENT=1) a clip with no sound track is reported as such, and the speech model is never loaded.
   6. (RELAYPROOF_NIM_DOWN=1) when NVIDIA is unavailable, the page says so in plain words and shows no results.
+  7. (RELAYPROOF_BLANK=1) a clip whose frames come out black (for example an undecodable codec) is stopped before any frame is sent.
 
 Exits non-zero if the page throws, shows an unexpected error, or a check fails.
 Needs: pip install playwright && python -m playwright install chromium
@@ -34,6 +35,7 @@ VIDEO = os.environ.get('RELAYPROOF_VIDEO')
 LIVE = os.environ.get('RELAYPROOF_LIVE') == '1'
 SILENT = os.environ.get('RELAYPROOF_SILENT') == '1'
 NIM_DOWN = os.environ.get('RELAYPROOF_NIM_DOWN') == '1'
+BLANK = os.environ.get('RELAYPROOF_BLANK') == '1'
 TRANSCRIPT = os.environ.get('RELAYPROOF_TRANSCRIPT')
 
 if not VIDEO:
@@ -116,6 +118,17 @@ def main():
             page.route('**/*.huggingface.co/**', block_speech_model)
         page.goto(URL, wait_until='networkidle', timeout=90000)
         load_clip(page)
+
+        if BLANK:
+            page.get_by_role('button', name='Analyse this clip').click()
+            wait_for_result_or_error(page, timeout_s=240)
+            message = page.locator('.inline-error').all_inner_texts()
+            check(any('came out black' in m for m in message), f'blank picture: a plain message is shown ({message[:1]})')
+            check(seen['frames_requests'] == 0, 'blank picture: no frame was sent to NVIDIA')
+            check(page.locator('.analyze-summary').count() == 0, 'blank picture: no results are shown')
+            report_summary(page, errors)
+            browser.close()
+            return finish(errors)
 
         if NIM_DOWN:
             page.get_by_role('button', name='Analyse this clip').click()

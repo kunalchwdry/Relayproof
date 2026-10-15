@@ -7,7 +7,7 @@ import { postJson } from '../analysis/request.js';
 import { checkProvenance } from '../analysis/provenance.js';
 import { REVERSE_IMAGE_SEARCHES, frameFileName } from '../analysis/reverseSearch.js';
 import { decodeAudio, transcribeAudio, MAX_SPEECH_SECONDS, SPEECH_MODEL } from '../analysis/transcribe.js';
-import { detectAudioTrack, describeAnalysisError, speechFailureMessage, ANALYSIS_LIMITS } from '../analysis/mediaCheck.js';
+import { detectAudioTrack, describeAnalysisError, speechFailureMessage, ANALYSIS_LIMITS, pictureLooksBlank, BLANK_PICTURE_MESSAGE } from '../analysis/mediaCheck.js';
 import { buildReport, reportFileName } from '../analysis/report.js';
 
 const MAX_VIDEO_BYTES = ANALYSIS_LIMITS.maxVideoMb * 1024 * 1024;
@@ -211,6 +211,7 @@ export default function AnalyzeView({ notify }) {
       thumb.height = Math.max(1, Math.round((48 * (video.videoHeight || 540)) / (video.videoWidth || 960)));
       const thumbContext = thumb.getContext('2d', { willReadFrequently: true });
       const candidates = [];
+      const meanLumas = [];
       let previous = null;
       setPhase('sampling');
       for (let i = 0; i < scanTimes.length; i += 1) {
@@ -220,12 +221,17 @@ export default function AnalyzeView({ notify }) {
         thumbContext.drawImage(video, 0, 0, thumb.width, thumb.height);
         const pixels = thumbContext.getImageData(0, 0, thumb.width, thumb.height).data;
         const gray = new Uint8Array(thumb.width * thumb.height);
+        let lumaSum = 0;
         for (let p = 0, g = 0; p < pixels.length; p += 4, g += 1) {
           gray[g] = (pixels[p] * 299 + pixels[p + 1] * 587 + pixels[p + 2] * 114) / 1000;
+          lumaSum += gray[g];
         }
+        meanLumas.push(lumaSum / gray.length);
         candidates.push({ time: scanTimes[i], diff: previous ? frameDifference(previous, gray) : 0 });
         previous = gray;
       }
+      // Stop before any frame is captured or sent if the browser cannot show the picture.
+      if (pictureLooksBlank(meanLumas)) throw new Error(BLANK_PICTURE_MESSAGE);
       let times = chooseSampleTimes(candidates, count, length).map(t => Math.max(0.1, Math.min(length - 0.2, t)));
       if (times.length === 0) times = [0.1];
       const canvas = document.createElement('canvas');
