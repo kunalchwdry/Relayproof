@@ -15,10 +15,11 @@ Keys are read on the server only. Set `NVIDIA_API_KEY` and `SERPAPI_KEY` in `.en
 ## Tests
 
 ```bash
-npm run test:credentials
-npm run test:analysis
-npm run test:nim
+npm run test:analysis      # findings, captions, frame choice, request retries, model-output parsing
+npm run test:nim           # frame-analysis request validation
 npm run test:extension
+npm run test:e2e           # browser test of the analysis page (needs RELAYPROOF_VIDEO; mocks NVIDIA unless RELAYPROOF_LIVE=1)
+npm run verify:speech -- clip.wav   # runs the in-browser speech model on a 16 kHz mono WAV, outside the browser
 ```
 
 ## Documentation
