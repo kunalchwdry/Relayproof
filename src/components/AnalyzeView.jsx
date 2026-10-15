@@ -54,7 +54,7 @@ function AlertPopup({ alerts, onJump, onClose }) {
           <div>
             <div className="section-kicker">HIGH-PRIORITY FINDINGS</div>
             <h3 id="alert-title">{alerts.length} thing{alerts.length === 1 ? '' : 's'} need your attention</h3>
-            <p id="alert-desc">These are AI-generated leads from frames and text. Check each one against the clip before acting.</p>
+            <p id="alert-desc">These are leads from the frames and text. Check each one against the clip before acting.</p>
           </div>
         </div>
         <ul className="alert-list">
@@ -327,8 +327,8 @@ export default function AnalyzeView({ notify }) {
             </article>
 
             <article className="panel result-block">
-              <div className="section-kicker">DEEPFAKE &amp; AI-GENERATED SIGNALS</div>
-              <p className="analyze-empty">No dedicated deepfake classifier runs yet, so this is not a deepfake verdict. The vision model's low-confidence observations are listed below for a human to check.</p>
+              <div className="section-kicker">DEEPFAKE &amp; AI-GENERATED CHECK</div>
+              <p className="analyze-empty">No automatic check for AI-generated or deepfake content runs on this page. The free models we tested could not tell real images from generated ones, so none is used. The vision model's low-confidence observations are listed below for a human to check.</p>
               {findings.synthetic.length === 0 ? <p className="analyze-empty">No synthetic-artifact observations.</p> : (
                 <ul className="finding-list">
                   {findings.synthetic.map((item, index) => (
@@ -355,7 +355,7 @@ export default function AnalyzeView({ notify }) {
               </ul>
             </article>
           </div>
-          <p className="analyze-empty">These are AI-generated judgments from frames and text: leads to check, not proof. Claim sources are shown under each claim.</p>
+          <p className="analyze-empty">These are judgments from frames and text: leads to check, not proof. Claim sources are shown under each claim.</p>
         </div>
       )}
 
