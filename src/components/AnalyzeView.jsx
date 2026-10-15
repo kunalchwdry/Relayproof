@@ -14,7 +14,8 @@ const MAX_VIDEO_BYTES = ANALYSIS_LIMITS.maxVideoMb * 1024 * 1024;
 const MAX_CLIP_SECONDS = ANALYSIS_LIMITS.maxClipMinutes * 60;
 const MAX_SAMPLES = 16;
 const MAX_SCAN = 180; // thumbnails compared per clip, at most
-const BATCH = 4;
+// 2 frames per request: the route runs its two frame calls in parallel, so one request stays under the 60 s serverless limit.
+const BATCH = 2;
 const MAX_FRAME_BYTES = 480 * 1024;
 const VIDEO_EXTENSION = /\.(mp4|mov|m4v|webm|mkv|avi|mpeg|mpg)$/i;
 
