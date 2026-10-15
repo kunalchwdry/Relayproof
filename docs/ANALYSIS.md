@@ -23,9 +23,22 @@ The "Analyse video" page plays a clip, reads frames, checks the words, and raise
 
 Visual inconsistencies and "possible synthetic artifacts" never raise a pop-up on their own. They appear as review items.
 
-## Deepfake and AI-generated signals: not a verdict
+## Deepfake and AI-generated signals: not checked automatically
 
-No dedicated deepfake classifier is connected yet. The NVIDIA synthetic-video detector in the catalog returns an internal error for this account, and it has no public documentation. The "Deepfake & AI-generated signals" card lists only the vision model's low-confidence observations. It must not be read as a deepfake result.
+No automatic check runs for AI-generated or deepfake content. The "Deepfake & AI-generated check" card lists only the vision model's low-confidence observations. It must not be read as a deepfake or AI-generated result.
+
+Why: we tested free models before shipping a browser check, and none could tell real images from generated ones.
+
+| Model (free, open) | Test | Result |
+| --- | --- | --- |
+| prithivMLmods/AI-vs-Deepfake-vs-Real-ONNX (8-bit, 87 MB) | 4 real photos, 4 generated images | 50% accuracy (chance) |
+| Organika/sdxl-detector (fp32, 354 MB, non-commercial licence) | same set, with the model's own normalisation | 50% accuracy (chance) |
+| ninini1/AI-image-detector (fp32, 354 MB) | same set | 50% accuracy (chance) |
+| NVIDIA synthetic-video detector | catalog call | internal error on this key |
+
+The set was small (8 images), so this is evidence against these models, not a full benchmark. A more accurate check would need a paid detection API or a larger, labelled evaluation. Neither is in place.
+
+The browser tab also ran out of memory on the 350 MB models in the test sandbox, so those models were not run in the browser.
 
 ## Speech: not yet automatic
 
@@ -34,9 +47,9 @@ NVIDIA's catalog has no speech-to-text model for this key. Until an in-browser m
 ## Planned, not built
 
 - In-browser speech-to-text (Whisper via Transformers.js), run on the device.
-- In-browser frame classifier for deepfake and AI-generation signals, with its accuracy stated on the page.
+- A frame classifier for deepfake and AI-generation signals. Not started. It needs a model that passes a real-versus-generated test (see above) or a paid detection API that you approve.
 
-Both would download model files from the Hugging Face Hub at first use. No inference credits are needed.
+Speech-to-text would download model files from the Hugging Face Hub at first use. No inference credits are needed.
 
 ## Privacy
 
