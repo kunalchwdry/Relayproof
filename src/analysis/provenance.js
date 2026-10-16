@@ -58,8 +58,10 @@ export function describeProvenance(store) {
   if (sourceTypes.some(type => AI_GENERATED.test(type))) aiDeclared = 'generated';
   else if (sourceTypes.some(type => AI_EDITED.test(type))) aiDeclared = 'edited';
 
+  // The library lists failures as entries with a code and explanation; some entries have no `success` field.
+  // Entries marked successful are left out, and so is an untrusted signer: trust is reported on its own line.
   const failures = (store.validation_status || [])
-    .filter(item => item && item.success === false)
+    .filter(item => item && item.success !== true && item.code !== 'signingCredential.untrusted')
     .map(item => item.explanation || item.code || 'unnamed check')
     .slice(0, 6);
   const state = ['Trusted', 'Valid', 'Invalid'].includes(store.validation_state) ? store.validation_state : 'Unknown';

@@ -131,3 +131,39 @@ test('real library output: a camera-declared file is not labelled as AI', async 
   assert.equal(result.aiDeclared, null);
   assert.equal(result.validation, 'valid');
 });
+
+// Shape taken from a real signed file: contentauth/example-assets videos/sora.MP4 (MIT), read with c2pa-python 0.38.
+// Its two validation entries have a code and explanation but no `success` field. The expired certificate must be listed as a failure.
+test('real signed MP4 (OpenAI, Sora): AI generation declared; expired certificate listed; untrusted signer not a failure', () => {
+  const result = describeProvenance({
+    active_manifest: 'urn:c2pa:bcf81c7f-d40f-4f4b-8e2e-4ad2b62dd90a',
+    manifests: {
+      'urn:c2pa:bcf81c7f-d40f-4f4b-8e2e-4ad2b62dd90a': {
+        signature_info: { issuer: 'OpenAI' },
+        claim_generator_info: undefined,
+        assertions: [{
+          label: 'c2pa.actions.v2',
+          data: { actions: [{ action: 'c2pa.created', softwareAgent: { name: 'Sora' }, digitalSourceType: 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia' }] },
+        }],
+      },
+    },
+    validation_state: 'Invalid',
+    validation_status: [
+      { code: 'signingCredential.untrusted', explanation: 'signing certificate untrusted' },
+      { code: 'signingCredential.expired', explanation: 'certificate expired' },
+    ],
+  });
+  assert.equal(result.aiDeclared, 'generated');
+  assert.equal(result.validation, 'invalid');
+  assert.deepEqual(result.failures, ['certificate expired']);
+});
+
+test('validation entries explicitly marked successful are not listed as failures', () => {
+  const result = describeProvenance({
+    active_manifest: 'urn:3',
+    manifests: { 'urn:3': signedManifest() },
+    validation_state: 'Valid',
+    validation_status: [{ code: 'x.ok', success: true, explanation: 'fine' }, { code: 'x.bad', success: false, explanation: 'broken' }],
+  });
+  assert.deepEqual(result.failures, ['broken']);
+});
