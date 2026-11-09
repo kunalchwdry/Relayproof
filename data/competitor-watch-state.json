@@ -54,7 +54,7 @@
       "url": "https://github.com/codemyriad/cassini-format",
       "description": "An ordinary .opus audio file that carries its own word-timestamped transcript, speakers and provenance in its OpusTags.",
       "default_branch": "main",
-      "pushed_at": "2026-09-28T18:51:23Z",
+      "pushed_at": "2026-11-09T16:31:05Z",
       "updated_at": "2026-09-28T13:06:41Z",
       "archived": false,
       "stars": 0,
@@ -69,7 +69,7 @@
       "url": "https://github.com/CreativeMayhemLtd/provcheck",
       "description": "Local-first C2PA Content Credentials verifier + creator toolkit. Neural-watermark cross-check (silentcipher, AudioSeal, WavMark) and atproto-bound identity. CLI + GUI for Windows/Linux/macOS. Apache-2.0.",
       "default_branch": "main",
-      "pushed_at": "2026-11-02T08:15:38Z",
+      "pushed_at": "2026-11-09T08:15:51Z",
       "updated_at": "2026-10-30T14:37:12Z",
       "archived": false,
       "stars": 12,
@@ -84,7 +84,7 @@
       "url": "https://github.com/louissarvin/gapless",
       "description": "Set a stop, tick \"guarantee it\", and your exit is your stop price.",
       "default_branch": "main",
-      "pushed_at": "2026-10-30T11:35:42Z",
+      "pushed_at": "2026-11-06T11:34:43Z",
       "updated_at": "2026-10-13T22:22:01Z",
       "archived": false,
       "stars": 0,
@@ -130,9 +130,9 @@
       "description": "Open Audio Watermarking Tool",
       "default_branch": "master",
       "pushed_at": "2026-09-02T02:19:15Z",
-      "updated_at": "2026-10-31T18:20:05Z",
+      "updated_at": "2026-11-09T06:28:05Z",
       "archived": false,
-      "stars": 541,
+      "stars": 543,
       "latest_sha": "ff1c8ac55a97",
       "latest_message": "Merge pull request #15 from akx/split-deps",
       "latest_commit_at": "2026-09-02T02:19:15Z",
@@ -159,14 +159,14 @@
       "url": "https://github.com/themankindproject/audiofp",
       "description": "Audio fingerprinting SDK: Wang landmarks, Panako triplets, Haitsma–Kalker, streaming, file decoding, AudioSeal watermark detection.",
       "default_branch": "main",
-      "pushed_at": "2026-10-24T19:19:31Z",
-      "updated_at": "2026-10-30T16:41:18Z",
+      "pushed_at": "2026-11-05T13:33:46Z",
+      "updated_at": "2026-11-05T13:22:28Z",
       "archived": false,
       "stars": 12,
-      "latest_sha": "04f919211b68",
-      "latest_message": "ci: set Codecov project and patch targets to 80%",
-      "latest_commit_at": "2026-10-24T19:19:27Z",
-      "latest_commit_url": "https://github.com/themankindproject/audiofp/commit/04f919211b682a30c7ca049c36eca5c6b17b4bc3"
+      "latest_sha": "007735d446fc",
+      "latest_message": "ci: build doc snippets against the repo lockfile",
+      "latest_commit_at": "2026-11-05T13:22:19Z",
+      "latest_commit_url": "https://github.com/themankindproject/audiofp/commit/007735d446fc535db200b4cfd9daa35ce7e1a7e2"
     },
     "facebookresearch/audioseal": {
       "slug": "facebookresearch/audioseal",
@@ -174,14 +174,14 @@
       "url": "https://github.com/facebookresearch/audioseal",
       "description": "Localized watermarking for AI-generated speech audios, with SOTA on robustness and very fast detector",
       "default_branch": "main",
-      "pushed_at": "2026-11-02T09:54:48Z",
-      "updated_at": "2026-11-02T09:54:54Z",
+      "pushed_at": "2026-11-03T11:13:11Z",
+      "updated_at": "2026-11-09T14:00:08Z",
       "archived": false,
-      "stars": 802,
-      "latest_sha": "98f56cd74c63",
-      "latest_message": "Fix streaming state propagation in the watermark generator (#106)",
-      "latest_commit_at": "2026-11-02T09:54:47Z",
-      "latest_commit_url": "https://github.com/facebookresearch/audioseal/commit/98f56cd74c636c8dd78b6cd90aae38a1126b77f9"
+      "stars": 804,
+      "latest_sha": "1496f7662d6a",
+      "latest_message": "Update to 0.2.1 (#110)",
+      "latest_commit_at": "2026-11-03T11:12:29Z",
+      "latest_commit_url": "https://github.com/facebookresearch/audioseal/commit/1496f7662d6aa625602bb0dcd1b4997b63b47609"
     },
     "Redo-San/RedoSan-Authenticity": {
       "slug": "Redo-San/RedoSan-Authenticity",
@@ -189,14 +189,14 @@
       "url": "https://github.com/Redo-San/RedoSan-Authenticity",
       "description": "Beta tool for embedding and verifying digital authenticity in images, audio, and video using watermarks, C2PA, and steganography.",
       "default_branch": "main",
-      "pushed_at": "2026-11-02T09:38:10Z",
-      "updated_at": "2026-11-02T01:59:32Z",
+      "pushed_at": "2026-11-09T09:34:23Z",
+      "updated_at": "2026-11-04T08:36:32Z",
       "archived": false,
       "stars": 1,
-      "latest_sha": "33c8a166623a",
-      "latest_message": "ci(extension): include hidden build output in release artifact (#604)",
-      "latest_commit_at": "2026-11-02T01:59:27Z",
-      "latest_commit_url": "https://github.com/Redo-San/RedoSan-Authenticity/commit/33c8a166623a117b597d4b1053f4d8da638e76b8"
+      "latest_sha": "261953ee8664",
+      "latest_message": "feat(release): mirror the full asset set onto every release (#613)",
+      "latest_commit_at": "2026-11-04T08:36:26Z",
+      "latest_commit_url": "https://github.com/Redo-San/RedoSan-Authenticity/commit/261953ee86645eb8672c031301a41d8eae7e79ec"
     },
     "richardwooding/c2pa-inspector": {
       "slug": "richardwooding/c2pa-inspector",
@@ -204,7 +204,7 @@
       "url": "https://github.com/richardwooding/c2pa-inspector",
       "description": "Check whether a photo, video, audio file or PDF was AI-generated or edited since signing — full C2PA / Content Credentials validation running entirely in your browser. Pure Go compiled to WebAssembly; nothing is uploaded, no account, no tracking.",
       "default_branch": "main",
-      "pushed_at": "2026-11-02T14:52:23Z",
+      "pushed_at": "2026-11-09T15:20:07Z",
       "updated_at": "2026-09-28T04:21:27Z",
       "archived": false,
       "stars": 0,
@@ -217,16 +217,16 @@
       "slug": "1D-Coda/em-audio",
       "role": "Research/reference implementation for derived-audio provenance",
       "url": "https://github.com/1D-Coda/em-audio",
-      "description": "Reference implementation and reproducibility package for an evidence-monotone operator contract on derived audio: sample-exact interval provenance, declared kernel footprints, and a C2PA signed transport. Includes an independent third-party reproduction.",
+      "description": "EM-Audio: evidence-monotone audio representation. Reference implementation and reproducibility package.",
       "default_branch": "main",
-      "pushed_at": "2026-10-12T08:08:38Z",
-      "updated_at": "2026-10-12T08:08:41Z",
+      "pushed_at": "2026-11-09T03:31:40Z",
+      "updated_at": "2026-11-09T03:31:45Z",
       "archived": false,
       "stars": 0,
-      "latest_sha": "1b5336c74d9f",
-      "latest_message": "Novelty search moves to docs/ so the archive keeps it",
-      "latest_commit_at": "2026-10-12T08:08:37Z",
-      "latest_commit_url": "https://github.com/1D-Coda/em-audio/commit/1b5336c74d9f120185a91d5da19b380847b9ffc9"
+      "latest_sha": "e22afbd53ac0",
+      "latest_message": "Archive carries only the release: git and Zenodo metadata and the GitHub kit launcher export-ignored; superseded macOS launcher removed",
+      "latest_commit_at": "2026-11-09T02:42:35Z",
+      "latest_commit_url": "https://github.com/1D-Coda/em-audio/commit/e22afbd53ac08a3a88fbbb118436e248b1aaafe6"
     },
     "digimarc-corp/c2pa-content-credentials-extension": {
       "slug": "digimarc-corp/c2pa-content-credentials-extension",
@@ -249,7 +249,7 @@
       "url": "https://github.com/Original-Pictures/soft-bindings-benchmark",
       "description": "Open-licence benchmark of invisible watermarks and content fingerprints as C2PA soft bindings for images, audio and video: code, results and preprint source",
       "default_branch": "main",
-      "pushed_at": "2026-10-02T01:10:41Z",
+      "pushed_at": "2026-11-07T22:35:06Z",
       "updated_at": "2026-10-02T01:41:38Z",
       "archived": false,
       "stars": 0,
@@ -280,9 +280,9 @@
       "description": "A list of C2PA approved soft binding algorithms",
       "default_branch": "main",
       "pushed_at": "2026-10-29T13:55:44Z",
-      "updated_at": "2026-10-28T15:56:28Z",
+      "updated_at": "2026-11-07T01:44:49Z",
       "archived": false,
-      "stars": 35,
+      "stars": 36,
       "latest_sha": "1ba294fee150",
       "latest_message": "Merge pull request #91 from casmolin/add-studio-aidr-silentcipher-1",
       "latest_commit_at": "2026-10-28T15:56:22Z",
@@ -314,22 +314,22 @@
       "name": "Resemble Watermarker",
       "url": "https://www.resemble.ai/products/watermarker",
       "etag": "",
-      "last_modified": "Mon, 02 Nov 2026 17:12:56 GMT",
-      "text_sha256": "a8c4e9f48a763677e999c86f9295b981ff0b74ede02814c09d20647b0d0b48dd",
-      "visible_text_chars": 14214
+      "last_modified": "Mon, 09 Nov 2026 17:38:39 GMT",
+      "text_sha256": "bdde9bd5735786ee01046b789d2346c48a3b9461451ba04a811f7f04b95e6a0f",
+      "visible_text_chars": 14190
     },
     "https://developers.openai.com/api/docs/guides/content-provenance": {
       "name": "OpenAI Content Provenance API",
       "url": "https://developers.openai.com/api/docs/guides/content-provenance",
-      "etag": "\"f28f6023fd6915f92d23eff1643703ea\"",
-      "last_modified": "Mon, 02 Nov 2026 16:22:39 GMT",
-      "text_sha256": "be45f88ad89f98a668b4123e5f71ca257c10655bd349c0d6a5415486e926a869",
-      "visible_text_chars": 23077
+      "etag": "\"a7f4826c64b6a963356917e338bf053b\"",
+      "last_modified": "Mon, 09 Nov 2026 17:37:23 GMT",
+      "text_sha256": "f7b2c447fcd6e701a7e0d520e45ac1c3bc7fc8570d45f057d9ddaa3e86fd9a7d",
+      "visible_text_chars": 23227
     },
     "https://monad.xyz/developers/hackathons/metropolis": {
       "name": "Monad Metropolis Track 04",
       "url": "https://monad.xyz/developers/hackathons/metropolis",
-      "etag": "\"31448c42bb5b1408dc09278e908a5c73\"",
+      "etag": "\"3e0f846f93f07cfd24eb929295d091c6\"",
       "last_modified": "",
       "text_sha256": "b85d9467cbb5f5fd39c2adbb8a01857f46722a429d0443148292d7b88d235ac0",
       "visible_text_chars": 15542
@@ -338,9 +338,9 @@
       "name": "AWS SENTINEL audio provenance",
       "url": "https://aws.amazon.com/blogs/media/building-audio-provenance-for-ai-generated-content-at-the-source-with-aws/",
       "etag": "",
-      "last_modified": "Mon, 26 Oct 2026 22:47:01 GMT",
-      "text_sha256": "1e898ef4584a8ad00607725f60da3e235d95efbc9fb9d0fe8354506626ae761d",
-      "visible_text_chars": 21595
+      "last_modified": "Thu, 05 Nov 2026 22:29:39 GMT",
+      "text_sha256": "2dc51792db0d9bb411e8ec49f4977826a8dcb8b7401ce79a4f0e9c04eac07783",
+      "visible_text_chars": 21528
     },
     "https://aiwatermark.com/c2pa.html": {
       "name": "AIWatermark C2PA/conformance",
@@ -363,16 +363,16 @@
       "url": "https://chromewebstore.google.com/detail/contentlens-c2pa-validato/gdejpnjeepoffhkbcgnjdbkgpohdhmln?hl=en",
       "etag": "",
       "last_modified": "",
-      "text_sha256": "8429785f3bacabbbaa0e2980c06338b52cad93725b77b934cb1df704642f81f2",
-      "visible_text_chars": 7299
+      "text_sha256": "4a2882dbe52fa6f71b3e7892470826cfd915d099703cfc2a390e1d1338432749",
+      "visible_text_chars": 7230
     },
     "https://chromewebstore.google.com/detail/mjkaocdlpjmphfkjndocehcdhbigaafp?hl=en": {
       "name": "Digimarc C2PA Content Credentials extension",
       "url": "https://chromewebstore.google.com/detail/mjkaocdlpjmphfkjndocehcdhbigaafp?hl=en",
       "etag": "",
       "last_modified": "",
-      "text_sha256": "df1b7d4a21aa881cc0ddf9aad3e4a70c78d63b250236ea9e94a9475417eaa83d",
-      "visible_text_chars": 6541
+      "text_sha256": "9f20a2fc585c783429f1f2f9cbae0244fe163b9475b088243240602622a1c4c0",
+      "visible_text_chars": 6035
     }
   },
   "search_results": {
@@ -444,11 +444,43 @@
     ],
     "AudioSeal implementations": [
       {
+        "full_name": "Angela-DAngelo/Traditional-vs-Modern-Audio-Watermarking",
+        "url": "https://github.com/Angela-DAngelo/Traditional-vs-Modern-Audio-Watermarking",
+        "description": "Comparative study of AI-based and traditional signal-processing approaches for digital audio watermarking. Includes the STAMP system, benchmarks against AudioSeal, WavMark, and SilentCipher, and robustness evaluation under standardized perturbations.",
+        "pushed_at": "2026-11-08T13:37:47Z",
+        "stars": 0,
+        "query_name": "AudioSeal implementations"
+      },
+      {
+        "full_name": "vitor-delgallo/provenance-kit",
+        "url": "https://github.com/vitor-delgallo/provenance-kit",
+        "description": "Media provenance toolkit for Python: invisible watermarks (TrustMark, VideoSeal, AudioSeal), perceptual fingerprints (PDQ, Chromaprint), C2PA manifests and OpenTimestamps proofs.",
+        "pushed_at": "2026-11-06T02:44:15Z",
+        "stars": 0,
+        "query_name": "AudioSeal implementations"
+      },
+      {
+        "full_name": "themankindproject/audiofp",
+        "url": "https://github.com/themankindproject/audiofp",
+        "description": "Audio fingerprinting SDK: Wang landmarks, Panako triplets, Haitsma–Kalker, streaming, file decoding, AudioSeal watermark detection.",
+        "pushed_at": "2026-11-05T13:33:46Z",
+        "stars": 12,
+        "query_name": "AudioSeal implementations"
+      },
+      {
+        "full_name": "Kennmarq-com/comfyui-kennmarq",
+        "url": "https://github.com/Kennmarq-com/comfyui-kennmarq",
+        "description": "ComfyUI nodes that mark AI pictures, songs and clips as you save them: an invisible watermark and signed C2PA Content Credentials",
+        "pushed_at": "2026-11-04T15:28:46Z",
+        "stars": 0,
+        "query_name": "AudioSeal implementations"
+      },
+      {
         "full_name": "facebookresearch/audioseal",
         "url": "https://github.com/facebookresearch/audioseal",
         "description": "Localized watermarking for AI-generated speech audios, with SOTA on robustness and very fast detector",
-        "pushed_at": "2026-11-02T09:54:48Z",
-        "stars": 802,
+        "pushed_at": "2026-11-03T11:13:11Z",
+        "stars": 804,
         "query_name": "AudioSeal implementations"
       },
       {
@@ -479,7 +511,7 @@
         "full_name": "CreativeMayhemLtd/provcheck",
         "url": "https://github.com/CreativeMayhemLtd/provcheck",
         "description": "Local-first C2PA Content Credentials verifier + creator toolkit. Neural-watermark cross-check (silentcipher, AudioSeal, WavMark) and atproto-bound identity. CLI + GUI for Windows/Linux/macOS. Apache-2.0.",
-        "pushed_at": "2026-11-02T08:15:38Z",
+        "pushed_at": "2026-11-09T08:15:51Z",
         "stars": 12,
         "query_name": "AudioSeal implementations"
       },
@@ -490,38 +522,6 @@
         "pushed_at": "2026-10-30T08:37:37Z",
         "stars": 0,
         "query_name": "AudioSeal implementations"
-      },
-      {
-        "full_name": "euisuh/audio-command-span-gating-demo",
-        "url": "https://github.com/euisuh/audio-command-span-gating-demo",
-        "description": "Small CPU demo: word-level AudioSeal span gating vs utterance-level gating for voice-agent commands. Synthetic TTS; reproduces prior-art ideas.",
-        "pushed_at": "2026-10-29T11:55:56Z",
-        "stars": 0,
-        "query_name": "AudioSeal implementations"
-      },
-      {
-        "full_name": "themankindproject/audiofp",
-        "url": "https://github.com/themankindproject/audiofp",
-        "description": "Audio fingerprinting SDK: Wang landmarks, Panako triplets, Haitsma–Kalker, streaming, file decoding, AudioSeal watermark detection.",
-        "pushed_at": "2026-10-24T19:19:31Z",
-        "stars": 12,
-        "query_name": "AudioSeal implementations"
-      },
-      {
-        "full_name": "jae-yoonlee/audioseal-offset-analysis",
-        "url": "https://github.com/jae-yoonlee/audioseal-offset-analysis",
-        "description": "AudioSeal 시작 위치 변화에 따른 검출과 16비트 메시지 복원 분석: 원고, 저장 결과 검산 및 재현 문서",
-        "pushed_at": "2026-10-23T13:45:16Z",
-        "stars": 0,
-        "query_name": "AudioSeal implementations"
-      },
-      {
-        "full_name": "rtonf/neutral-tts-workbench",
-        "url": "https://github.com/rtonf/neutral-tts-workbench",
-        "description": "Local Japanese TTS workbench for Windows with verified preview, recovery and explicit AudioSeal watermarking",
-        "pushed_at": "2026-10-14T14:05:18Z",
-        "stars": 0,
-        "query_name": "AudioSeal implementations"
       }
     ],
     "Opus audio provenance projects": [
@@ -529,18 +529,74 @@
         "full_name": "codemyriad/cassini-format",
         "url": "https://github.com/codemyriad/cassini-format",
         "description": "An ordinary .opus audio file that carries its own word-timestamped transcript, speakers and provenance in its OpusTags.",
-        "pushed_at": "2026-09-28T18:51:23Z",
+        "pushed_at": "2026-11-09T16:31:05Z",
         "stars": 0,
         "query_name": "Opus audio provenance projects"
       }
     ],
     "C2PA audio implementations": [
       {
+        "full_name": "wiltodelta/remove-ai-watermarks",
+        "url": "https://github.com/wiltodelta/remove-ai-watermarks",
+        "description": "Remove visible and invisible AI watermarks from images and video, and AI provenance metadata from images, video, and audio. Python library, CLI, and agent skill for SynthID, C2PA, EXIF, IPTC, XMP, and common generative-AI marks. By Victor Kuznetsov.",
+        "pushed_at": "2026-11-09T06:44:19Z",
+        "stars": 6331,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "1D-Coda/em-audio",
+        "url": "https://github.com/1D-Coda/em-audio",
+        "description": "EM-Audio: evidence-monotone audio representation. Reference implementation and reproducibility package.",
+        "pushed_at": "2026-11-09T03:31:40Z",
+        "stars": 0,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "ivanusto/unmark-web",
+        "url": "https://github.com/ivanusto/unmark-web",
+        "description": "Independent browser-first client that strips invisible Unicode marks and C2PA/EXIF/XMP/ID3 metadata from text, images, audio and video locally, or via the watermarks-remover Python service (MIT)",
+        "pushed_at": "2026-11-08T10:44:16Z",
+        "stars": 16,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "lars-1987/metastrip",
+        "url": "https://github.com/lars-1987/metastrip",
+        "description": "Strip metadata, C2PA Content Credentials and AI markers from photos, PDFs, Office docs, video and audio. 100% in your browser, no uploads.",
+        "pushed_at": "2026-11-08T04:43:54Z",
+        "stars": 10,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "ddpicc/metadata-fields",
+        "url": "https://github.com/ddpicc/metadata-fields",
+        "description": "File metadata field reference: 109 EXIF, XMP, C2PA, MP4, PDF, Office and audio fields, with the risk each one carries. Powers erasetadata.com",
+        "pushed_at": "2026-11-05T10:34:05Z",
+        "stars": 0,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "Kennmarq-com/kennmarq-agent-kit",
+        "url": "https://github.com/Kennmarq-com/kennmarq-agent-kit",
+        "description": "Kennmarq.com for AI coding agents: a skill, a Cursor rule and an MCP server that add C2PA Content Credentials and invisible watermarks where an app makes AI images, video or audio (EU AI Act Art. 50, California SB 942)",
+        "pushed_at": "2026-11-04T21:58:30Z",
+        "stars": 0,
+        "query_name": "C2PA audio implementations"
+      },
+      {
         "full_name": "Redo-San/RedoSan-Authenticity",
         "url": "https://github.com/Redo-San/RedoSan-Authenticity",
         "description": "Beta tool for embedding and verifying digital authenticity in images, audio, and video using watermarks, C2PA, and steganography.",
-        "pushed_at": "2026-11-02T09:38:10Z",
+        "pushed_at": "2026-11-09T09:34:23Z",
         "stars": 1,
+        "query_name": "C2PA audio implementations"
+      },
+      {
+        "full_name": "Ajinkya710/markproof-mcp",
+        "url": "https://github.com/Ajinkya710/markproof-mcp",
+        "description": "MCP server for Markproof: watermark and C2PA-sign AI-generated images and audio (EU AI Act Article 50)",
+        "pushed_at": "2026-11-03T23:49:07Z",
+        "stars": 0,
         "query_name": "C2PA audio implementations"
       },
       {
@@ -549,30 +605,6 @@
         "description": "Zero-trace metadata, EXIF, and C2PA AI provenance eraser for photos, videos, PNG, and audio",
         "pushed_at": "2026-11-01T18:45:53Z",
         "stars": 0,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "wiltodelta/remove-ai-watermarks",
-        "url": "https://github.com/wiltodelta/remove-ai-watermarks",
-        "description": "Remove visible and invisible AI watermarks from images and video, and AI provenance metadata from images, video, and audio. Python library, CLI, and agent skill for SynthID, C2PA, EXIF, IPTC, XMP, and common generative-AI marks.",
-        "pushed_at": "2026-11-01T17:47:13Z",
-        "stars": 6257,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "Ajinkya710/markproof-mcp",
-        "url": "https://github.com/Ajinkya710/markproof-mcp",
-        "description": "MCP server for Markproof: watermark and C2PA-sign AI-generated images and audio (EU AI Act Article 50)",
-        "pushed_at": "2026-11-01T10:15:20Z",
-        "stars": 0,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "lars-1987/metastrip",
-        "url": "https://github.com/lars-1987/metastrip",
-        "description": "Strip metadata, C2PA Content Credentials and AI markers from photos, PDFs, Office docs, video and audio. 100% in your browser, no uploads.",
-        "pushed_at": "2026-11-01T00:46:59Z",
-        "stars": 8,
         "query_name": "C2PA audio implementations"
       },
       {
@@ -582,38 +614,6 @@
         "pushed_at": "2026-10-30T11:56:05Z",
         "stars": 1,
         "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "msmenzyk/mtl-c2pa-ableton",
-        "url": "https://github.com/msmenzyk/mtl-c2pa-ableton",
-        "description": "Max for Live device + local HTTP server that displays C2PA manifest info for the selected audio clip in Ableton Live.",
-        "pushed_at": "2026-10-29T22:55:37Z",
-        "stars": 0,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "Blimp3/provenance-lens-extension",
-        "url": "https://github.com/Blimp3/provenance-lens-extension",
-        "description": "Chromium Manifest V3 extension for user-triggered checks of C2PA Content Credentials in images and supported OpenAI provenance signals in images and short audio, not an AI detector. Credential-free MIT source edition with optional DigiBot pairing to send a page's video to Telegram.",
-        "pushed_at": "2026-10-29T12:40:21Z",
-        "stars": 0,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "provemark/tracefern-image-check",
-        "url": "https://github.com/provemark/tracefern-image-check",
-        "description": "WordPress plugin that verifies the Content Credentials (C2PA) of uploaded images, audio and text and shows the result in the Media Library.",
-        "pushed_at": "2026-10-29T07:08:40Z",
-        "stars": 0,
-        "query_name": "C2PA audio implementations"
-      },
-      {
-        "full_name": "ivanusto/unmark-web",
-        "url": "https://github.com/ivanusto/unmark-web",
-        "description": "Independent browser-first client that strips invisible Unicode marks and C2PA/EXIF/XMP/ID3 metadata from text, images, audio and video locally, or via the watermarks-remover Python service (MIT)",
-        "pushed_at": "2026-10-29T01:30:10Z",
-        "stars": 15,
-        "query_name": "C2PA audio implementations"
       }
     ],
     "General audio provenance projects": [
@@ -621,55 +621,47 @@
         "full_name": "docxology/steganographer",
         "url": "https://github.com/docxology/steganographer",
         "description": "Rust workspace for tamper-evident media — embeds BLAKE3 hashes, Ed25519 signatures, and visible QR watermarks into live video and audio via LSB, DCT, and spread-spectrum steganography. Crates for the core library, CLI, GStreamer and an Axum dashboard, with a test suite and real-time webcam verification.",
-        "pushed_at": "2026-11-02T17:06:19Z",
+        "pushed_at": "2026-11-09T17:33:27Z",
         "stars": 1,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "ndung768/YouAudioLab",
-        "url": "https://github.com/ndung768/YouAudioLab",
-        "description": "YouAudioLab is an open-source platform for building reproducible YouTube-derived audio–text datasets while retaining source-video metadata and processing provenance. ",
-        "pushed_at": "2026-11-02T13:34:27Z",
-        "stars": 0,
+        "full_name": "sonicfieldlabs/MASA",
+        "url": "https://github.com/sonicfieldlabs/MASA",
+        "description": "MASA — A local-first, language-neutral protocol for describing, listening to, granulating, dissecting, and exchanging sound as matter, with engine-neutral processing and agentic tooling (CLI, MCP, skills).",
+        "pushed_at": "2026-11-09T16:01:47Z",
+        "stars": 1,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "tuckn/tkn_audio_transcriber",
-        "url": "https://github.com/tuckn/tkn_audio_transcriber",
-        "description": "CLI that turns an audio file, or the audio stream inside a video file, into a Markdown transcript, SRT subtitles, JSONL segments, and a provenance manifest. ",
-        "pushed_at": "2026-11-02T04:31:23Z",
-        "stars": 0,
+        "full_name": "clockgrove/assetforge",
+        "url": "https://github.com/clockgrove/assetforge",
+        "description": "Game asset generation (sprites, animation, video, audio, 3D) through generation models, handed to a game's own asset pipeline with provenance",
+        "pushed_at": "2026-11-09T13:43:34Z",
+        "stars": 1,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "not-Kami/GhostMeta",
-        "url": "https://github.com/not-Kami/GhostMeta",
-        "description": "Zero-trace metadata, EXIF, and C2PA AI provenance eraser for photos, videos, PNG, and audio",
-        "pushed_at": "2026-11-01T18:45:53Z",
+        "full_name": "pmozil/music-ai-spectra",
+        "url": "https://github.com/pmozil/music-ai-spectra",
+        "description": "Rpository containing scripts for comparing audio clips agains FakeMusicCaps dataset to check for ai provenance",
+        "pushed_at": "2026-11-09T12:22:26Z",
         "stars": 0,
         "query_name": "General audio provenance projects"
       },
       {
         "full_name": "wiltodelta/remove-ai-watermarks",
         "url": "https://github.com/wiltodelta/remove-ai-watermarks",
-        "description": "Remove visible and invisible AI watermarks from images and video, and AI provenance metadata from images, video, and audio. Python library, CLI, and agent skill for SynthID, C2PA, EXIF, IPTC, XMP, and common generative-AI marks.",
-        "pushed_at": "2026-11-01T17:47:13Z",
-        "stars": 6257,
+        "description": "Remove visible and invisible AI watermarks from images and video, and AI provenance metadata from images, video, and audio. Python library, CLI, and agent skill for SynthID, C2PA, EXIF, IPTC, XMP, and common generative-AI marks. By Victor Kuznetsov.",
+        "pushed_at": "2026-11-09T06:44:19Z",
+        "stars": 6331,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "pinklon/reasonpack",
-        "url": "https://github.com/pinklon/reasonpack",
-        "description": "Build verifiable local research packs from YouTube: normalized video/audio, transcripts, metadata, provenance, and SHA-256 verification.",
-        "pushed_at": "2026-11-02T15:12:57Z",
-        "stars": 0,
-        "query_name": "General audio provenance projects"
-      },
-      {
-        "full_name": "Yug-dev0/CEFT",
-        "url": "https://github.com/Yug-dev0/CEFT",
-        "description": "Multimodal data pipeline for RAG — ingesting video, audio, image, PDF and JSON with verifiable spatiotemporal provenance and cross-modal entity linking.",
-        "pushed_at": "2026-11-01T06:36:10Z",
+        "full_name": "tuckn/tkn_audio_transcriber",
+        "url": "https://github.com/tuckn/tkn_audio_transcriber",
+        "description": "CLI that turns an audio file, or the audio stream inside a video file, into a Markdown transcript, SRT subtitles, JSONL segments, and a provenance manifest. ",
+        "pushed_at": "2026-11-09T02:01:55Z",
         "stars": 0,
         "query_name": "General audio provenance projects"
       },
@@ -677,24 +669,32 @@
         "full_name": "kyorohiro/tetorica-soundchip-native",
         "url": "https://github.com/kyorohiro/tetorica-soundchip-native",
         "description": "A collection of retro sound-chip C/C++ sources, native adapters, and WASM build recipes, with licenses and provenance documented. For games, synths, and audio tools.",
-        "pushed_at": "2026-11-01T05:07:44Z",
+        "pushed_at": "2026-11-08T15:51:10Z",
         "stars": 0,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "sonicfieldlabs/MASA",
-        "url": "https://github.com/sonicfieldlabs/MASA",
-        "description": "MASA — A local-first, language-neutral protocol for describing, listening to, granulating, dissecting, and exchanging sound as matter, with engine-neutral processing and agentic tooling (CLI, MCP, skills).",
-        "pushed_at": "2026-11-02T17:12:12Z",
+        "full_name": "pinklon/reasonpack",
+        "url": "https://github.com/pinklon/reasonpack",
+        "description": "Build verifiable local research packs from YouTube: normalized video/audio, transcripts, metadata, provenance, and SHA-256 verification.",
+        "pushed_at": "2026-11-07T14:00:35Z",
+        "stars": 0,
+        "query_name": "General audio provenance projects"
+      },
+      {
+        "full_name": "GambirBuilds/TraceAI",
+        "url": "https://github.com/GambirBuilds/TraceAI",
+        "description": "TraceAI is a multimodal AI content intelligence platform designed to analyze text, images, audio, and videos to help assess content authenticity, detect potential AI-generated media, and explore digital provenance. Built with modern web technologies, TraceAI aims to promote transparency, digital trust, and responsible content verification.",
+        "pushed_at": "2026-11-06T04:16:06Z",
         "stars": 1,
         "query_name": "General audio provenance projects"
       },
       {
-        "full_name": "enonymous1/voice-generator",
-        "url": "https://github.com/enonymous1/voice-generator",
-        "description": "Local, fully offline voice cloning from a text script: zero-shot TTS with Chatterbox, Qwen3-TTS, and CosyVoice 3 behind one CLI, rendering a WAV plus a provenance manifest for a talking-head Stage 2.",
-        "pushed_at": "2026-10-31T11:34:04Z",
-        "stars": 0,
+        "full_name": "facebookresearch/content-seal",
+        "url": "https://github.com/facebookresearch/content-seal",
+        "description": "Content Seal is a state-of-the-art framework for invisible, robust watermarking across all modalities audio, image, video, and text. This suite spans the entire generative lifecycle, from training data and inference to generated media.",
+        "pushed_at": "2026-11-05T11:10:45Z",
+        "stars": 243,
         "query_name": "General audio provenance projects"
       }
     ]
@@ -704,16 +704,20 @@
     "AGIFutureFoundation/Metropolis-SmartCiti",
     "Ajinkya710/markproof-mcp",
     "AmitChowdary122/attest8004",
+    "Angela-DAngelo/Traditional-vs-Modern-Audio-Watermarking",
     "Azhd/veritas-engine",
     "Blimp3/provenance-lens-extension",
     "ChipulaCollins/Lysen_audio_provenance",
     "ChipulaMulyampiya/Lysen_audio_-provenance",
     "CreativeMayhemLtd/provcheck",
+    "GambirBuilds/TraceAI",
     "GauriSaraf05/Multimodal-Framework-for-AI-Generated-Content-Detection-Provenance-Tracing",
     "HARI-CODER/video-watermarking-poc",
     "HarperZ9/gather",
     "HawzhinBlanca/hawa-voice-studio",
     "Hitchhikers-Guide-to-the-Galaxy/wiki-plugin-hear",
+    "Kennmarq-com/comfyui-kennmarq",
+    "Kennmarq-com/kennmarq-agent-kit",
     "Original-Pictures/soft-bindings-benchmark",
     "Redo-San/RedoSan-Authenticity",
     "Silwan5z/neural-audio-watermark-collusion-attack",
@@ -726,15 +730,18 @@
     "bitof-yash/deepfake-provenance-engine",
     "briansugrue/audioseal-watermark-detection",
     "catchmeifyoucaan/witness",
+    "clockgrove/assetforge",
     "cocombee/AlQuran-OpenSource",
     "codemyriad/cassini-format",
     "cyanheads/art-institute-chicago-mcp-server",
+    "ddpicc/metadata-fields",
     "dipakjad1993/RealEstate-Repair-Cost-Estimator",
     "docxology/steganographer",
     "eddorre/ruby-c2pa",
     "enonymous1/voice-generator",
     "euisuh/audio-command-span-gating-demo",
     "facebookresearch/audioseal",
+    "facebookresearch/content-seal",
     "filip-study/agent-pay-monad",
     "frankxai/starlight-creator-mcp",
     "hammaddola/voice-clone",
@@ -765,6 +772,7 @@
     "themankindproject/audiofp",
     "tuckn/tkn_audio_transcriber",
     "ubukhari/agent-disclosure",
+    "vitor-delgallo/provenance-kit",
     "wachin/song-chord-lyrics-analyzer",
     "waikato-llm/audio-dataset-converter-audioseal",
     "wiltodelta/remove-ai-watermarks",
